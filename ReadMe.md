@@ -1,26 +1,29 @@
-# Project Title
+# Representation of Spatial Heterogeneity in the MESH Model - Baker Creek, NWT
 
 ## Team
-  *Include the name of modeller(s), advisors, and other contributors involved in the project here, as well as key contact information*
+  **Primary modeller:** Haley Brauner  
+  **MESH training and support:** Dan Princz, ECCC  
+  **Advisors:** Bruce Davison, ECCC and Andrew Ireson, GIWS
 
 ## Date
-*Date(s) of the project*
+May-August, 2019
 
 ## Purpose
-  *Give a brief summary of the purpose of the modelling project here*
+  This project was completed as the Capstone Project for the Masters of Water Security (MWS) program at the University of Saskatchewan in partnership with Environment and Climate Change Canada (ECCC). The project replicated the methodology of a project conducted in the White Gull Creek watershed (SK) in 2017 by a previous MWS student, Herbert Mkandla, and aimed to explore the effects of various representations of sub-grid spatial heterogeneity on model performance. The project also compared the WATROF and PDMROF algorithms.
 
 ## Objectives and Main Tasks
   *List the objectives of the modelling, as well as a summary of the project structure and tasks completed*
 
 ## Basin Meta-data
-*Include a link to the MESH Wiki "Basin Meta-data" page, if created. Otherwise, link to a "Basin_Metadata.md" file in the "Site" folder
+*Include a link to the MESH Wiki "Basin Meta-data" page, if created. Otherwise, link to a "Basin_Metadata.md" file in the "Site" folder*
 
-[Basin Meta-data on MESH Wiki Page](https://wiki.usask.ca/display/MESH/Basin+Meta-data)
+[Basin Meta-data on MESH Wiki Page](https://wiki.usask.ca/display/MESH/Basin+Meta-data) *Not completed*
 
-[Basin Meta-data File](https://github.com/HaleyBrauner/MESH_Repo_Template/blob/master/Site/BasinMetaData.md)
+See here for basin meta-data    
+    [Basin Meta-data File](./Site)
 
 ## Progress / Conclusion
-*Include periodic updates on the modelling progress here, or even just "in progress"*
+*Include periodic updates on the modelling progress here, or even just "in progress"*  
 *Include the main findings of the modelling, and further recommendations*
 
 ## References
