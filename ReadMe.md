@@ -12,7 +12,9 @@ May-August, 2019
   This project was completed as the Capstone Project for the Masters of Water Security (MWS) program at the University of Saskatchewan in partnership with Environment and Climate Change Canada (ECCC). The project replicated the methodology of a project conducted in the White Gull Creek watershed (SK) in 2017 by a previous MWS student, Herbert Mkandla, and aimed to explore the effects of various representations of sub-grid spatial heterogeneity on model performance. The project also compared the WATROF and PDMROF algorithms.
 
 ## Objectives and Main Tasks
-  *List the objectives of the modelling, as well as a summary of the project structure and tasks completed*
+1.	In the Baker Creek Watershed (NWT), replicate the methodology used by Mkandla (2017) in the Whitegull Creek Watershed (SK) to evaluate the effect of complexity in the representation of spatial heterogeneity in the MESH model on model performance; and
+2.	Take the work further and explore additional model configuration options - including more than one grid in the basin, and using PDMROF instead of WATROF - to explore their effects on model performance.
+
 
 ## Basin Meta-data
 *Include a link to the MESH Wiki "Basin Meta-data" page, if created. Otherwise, link to a "Basin_Metadata.md" file in the "Site" folder*
