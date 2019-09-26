@@ -1,0 +1,3 @@
+AttributeName: Air_pressure_at_surface
+AttributeUnits: Pa
+Field = min(max(100*Source + 0), -inf), inf)

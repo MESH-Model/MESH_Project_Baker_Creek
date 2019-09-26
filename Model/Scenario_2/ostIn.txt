@@ -1,0 +1,128 @@
+# essential variables
+ProgramType         DDS
+#Need to change this for the more complex version where we will calibrate in parallel
+ModelExecutable     ./run_mesh.sh
+#ModelExecutable     /home/hlb749/RunMesh/MESH_Code.r1024/sa_mesh
+#write the hard path of the executable file
+ModelSubdir         .
+ObjectiveFunction   GCOP
+#RandomSeed:   <number here>
+
+BeginFilePairs
+MESH_parameters_CLASS.tpl ; MESH_parameters_CLASS.ini
+MESH_parameters_hydrology.tpl ; MESH_parameters_hydrology.ini
+EndFilePairs
+
+BeginParams
+#<name1>  <init1> <lwr1> <upr1> <txIn1> <txOst1> <txOut1> <fmt1>
+_WF-R2_	0.3	0.3	3
+_ZSNL_	0.001	0.001	0.2
+_ZPLS_	0.005	0.005	0.5
+_ZPLG-NL_	0.005	0.005	0.7
+_ZPLG-BL_	0.005	0.005	0.5
+_ZPLG-WL_	0.005	0.005	0.75
+_ZPLG-PL_	0.005	0.005	0.5
+_ZPLG-W_	0.005	0.005	0.75
+_ZPLG-BR_	0.005	0.005	0.75
+_LAMX-NL_	1.8	1.8	3
+_LAMX-BL_	2	2	4
+_LAMX-WL_	0.5	0.5	3
+_LAMX-PL_	0.5	0.5	3
+_LNZ0-NL_	-0.8	-0.8	0
+_LNZ0-BL_	-0.7	-0.7	0
+_LNZ0-WL_	-3.689	-3.689	-2.12
+_LNZ0-PL_	-3.689	-3.689	-2.12
+_LNZ0-W_	-8.111	-8.111	-3.689
+_LNZ0-BR_	-5.298	-5.298	-1.609
+_LAMN-NL_	1.6	1.6	3
+_LAMN-BL_	0.4	0.4	1.2
+_LAMN-WL_	0.3	0.3	3
+_LAMN-PL_	0.3	0.3	3
+_ALVC-NL_	0.02	0.02	0.05
+_ALVC-BL_	0.04	0.04	0.07
+_ALVC-WL_	0.02	0.02	0.08
+_ALVC-PL_	0.02	0.02	0.08
+_ALVC-W_	0.04	0.04	0.3
+_ALVC-BR_	0.07	0.07	0.2
+_CMAS-NL_	9	9	12
+_CMAS-BL_	15	15	22
+_CMAS-WL_	1	1	4
+_CMAS-PL_	1	1	4
+_ALIC-NL_	0.18	0.18	0.2
+_ALIC-BL_	0.28	0.28	0.3
+_ALIC-WL_	0.24	0.24	0.26
+_ALIC-PL_	0.24	0.24	0.26
+_ALIC-W_	0.13	0.13	0.15
+_ALIC-BR_	0.2	0.2	0.6
+_ROOT-NL_	0.3	0.3	1
+_ROOT-BL_	0.3	0.3	1
+_ROOT-WL_	0.3	0.3	1
+_ROOT-PL_	0.3	0.3	1
+_RSMN-NL_	150	150	250
+_RSMN-BL_	75	75	175
+_RSMN-WL_	50	50	150
+_RSMN-PL_	50	50	150
+_SDEP-NL_	1	1	4
+_SDEP-BL_	1	1	4
+_SDEP-WL_	0.4	0.4	1
+_SDEP-PL_	0.4	0.4	4
+_SDEP-W_	0.4	0.4	1
+_SDEP-BR_	0	0	0.5
+_GRKF-NL_	0.01	0.01	0.5
+_GRKF-BL_	0.01	0.01	0.5
+_GRKF-WL_	0.01	0.01	0.5
+_GRKF-PL_	0.01	0.01	0.5
+_GRKF-W_	0.01	0.01	0.5
+_GRKF-BR_	0.01	0.01	0.5
+_MANN-NL_	0.04	0.16	0.2
+_MANN-BL_	0.04	0.16	0.2
+_MANN-WL_	0.03	0.03	0.08
+_MANN-PL_	0.03	0.03	0.08
+_MANN-W_	0.033	0.033	0.05
+_MANN-BR_	0.016	0.016	0.035
+_KSAT-NL_	0.0000001	0.0000001	0.00001
+_KSAT-BL_	0.0000001	0.0000001	0.00001
+_KSAT-WL_	0.0000001	0.0000001	0.000001
+_KSAT-PL_	0.000001	0.000001	0.0001
+_KSAT-W_	0.0000001	0.0000001	0.000001
+_SAND2-NL_	0	0	65
+_SAND2-BL_	0	0	65
+_SAND3-NL_	0	0	65
+_SAND3-BL_	0	0	65
+_SAND3-WL_	0	0	40
+_SAND3-W_	0	0	40
+_SAND4-NL_	20	20	40
+_SAND4-BL_	20	20	40
+_SAND4-WL_	0	0	40
+_SAND4-W_	0	0	40
+_CLAY2-NL_	0	0	10
+_CLAY2-BL_	0	0	10
+_CLAY3-NL_	40	40	65
+_CLAY3-BL_	40	40	65
+_CLAY3-WL_	60	60	100
+_CLAY3-W_	60	60	100
+_CLAY4-NL_	60	60	100
+_CLAY4-BL_	60	60	100
+_CLAY4-WL_	60	60	100
+_CLAY4-W_	60	60	100
+EndParams
+
+BeginResponseVars
+#name     filename          key       line  col token augmented?
+negNSD    Metrics_Out.txt ; OST_NULL  1     7   ' '   yes
+#neglnNSD    Metrics_Out.txt ; OST_NULL  1     9   ' '   yes
+#This defines to response variables but we haven't specified how to use them
+EndResponseVars
+
+BeginDDSAlg
+PerturbationValue   0.2
+#Full calibration will use a 1000 for MaxIterations
+MaxIterations       1000
+#UseInitialParamValues
+UseRandomParamValues
+EndDDSAlg
+
+BeginGCOP
+CostFunction      negNSD
+PenaltyFunction   APM
+EndGCOP

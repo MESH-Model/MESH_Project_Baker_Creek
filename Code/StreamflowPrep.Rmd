@@ -1,0 +1,225 @@
+---
+title: "Baker Creek Watershed MESH Model - Data Preparation"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+First, load the libraries that will be used in the code.
+```{r}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(devtools)
+library(CRHMr)
+library(ggpubr)
+```
+
+## Prepare Streamflow Data for the MESH Model
+Streamflow data was obtained from the Water Survey of Canada website for station 07SB013 Baker Creek at the Outlet of Lower Martin Lake [WSC - 07SB013](https://wateroffice.ec.gc.ca/search/historical_results_e.html?search_type=station_number&station_number=07sb013&start_year=1850&end_year=2019&minimum_years=&gross_drainage_operator=%3E&gross_drainage_area=&effective_drainage_operator=%3E&effective_drainage_area=)
+
+This station includes both discharge (param=1) and water level (param=2) data for the years 1983-2016, so it was filtered for discharge data only from 2015 onward.
+
+### Loading in the data
+
+```{r}
+Qload <- read_csv(file="C:/Users/haley/OneDrive/Documents/1.MWS2018-2019/T2/Project/ECCC_Project/Data/WSC Streamflow/07SB013 - Daily__May-13-2019_Date-Data.csv")
+    # Param=1: Daily Discharge, Param=2: Daily Water Level
+    # Symbols: E=Estimate, A=PartialDay, B=Ice Conditions, D=Dry, R=Revised
+
+```
+
+### Using CRHMr to explore the missing values in the data
+```{r}
+Q <- Qload
+Q <- Q %>%
+  filter(PARAM==1 & Date>="2005-01-01") %>% 
+  select(-ID, -PARAM) %>%
+  rename(datetime=Date)
+
+#Convert date of Q to POSIXct for use with CRHMr package
+Q_df <- as.data.frame(Q)
+
+Q_df$datetime <- as.POSIXct(Q_df$datetime, tz="MST")
+
+head(Q_df)
+
+Qgaps <- findGaps(Q_df, minlength=1, quiet=FALSE)
+
+```
+
+### Generate plots of the full, observed streamflow to view it
+```{r}
+QPlot <- Q
+
+ggplot(data=QPlot, mapping=aes(x=datetime))+
+  geom_line(aes(y=Value)) +
+  scale_x_date(date_labels=("%Y"), date_breaks=("years"))
+
+QPlot2 <- filter(QPlot, datetime>=as.Date("2006-09-15"))
+QPlot2 <- filter(QPlot2, datetime<=as.Date("2016-09-14"))
+QPlot2 <- select(QPlot2, -SYM)
+
+Q_Report <- ggplot(data=QPlot2, mapping=aes(x=datetime))+
+  geom_line(aes(y=Value)) +
+  scale_x_date(date_labels=("%Y"), date_breaks=("years"))+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date")+
+  theme(axis.title.y=element_text(size=7))
+
+```
+### Load and plot precipitation used in the model to compare with streamflow
+```{r}
+#Load in the precipitation data used in the model
+Pload <- read.csv("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Driving Data/Original/basin_rain.xlsx.csv")
+
+#Since the units of P used in the model are mm/s, convert to mm by multiplying by 60*30
+P <- Pload
+P <- mutate(P, P_mm=Combined*60*30)
+colnames(P) <- c("Datetime", "P_mm_s", "P_mm")
+
+#Convert to daily rainfall
+P <- mutate(P, Date=date(Datetime))
+
+P_daily <- P
+P_daily <- P_daily %>%
+  group_by(Date) %>%
+  summarise(DailySum=sum(P_mm))%>%
+  filter(Date>= as.Date("2006-09-15"))%>%
+  filter(Date <= as.Date("2016-09-14"))
+
+write_excel_csv(P_daily, "F:/ECCC_Project/R Code/DailyPModel.csv")
+
+P_Report <- ggplot(P_daily) +
+  geom_col(mapping=aes(x=Date, y=DailySum))+
+  scale_x_date(date_labels=("%Y"), date_breaks=("years"))+
+  ylab("Daily Precipitation (mm)")+
+  theme(axis.title.x = element_blank(), axis.text.x=element_text(size=0), axis.title.y=element_text(size=7))+
+  ylim(30,0)
+
+P_Report
+
+PandQPlot <- ggarrange(P_Report, Q_Report, ncol=1, nrow=2, heights=c(0.75, 1.5), align="v")
+
+PandQPlot
+
+ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/PandQPlot.jpg", plot=PandQPlot, width=17.75, height=9, units="cm")
+
+
+```
+
+### Separate the streamflow into calibration and validation periods and save them as .csv files
+The model starts on September 15, 2005 (day 258), so will choose the calibration periods to also start on Sept. 15 and end on Sept. 14
+
+(Note: chose spin-up period of 2006-258 through 2007-257. Afterward realized this has to be consistent for both cal and val periods; therefore, not running the model for 2005-2006. Incorporated this into the streamflow values.)
+
+Calibration period: 2007-258 through 2010-257, and 2013-258 to 2015-257 (inclusive; start Sept. 15 and end Sept. 14)
+Validation period: remainder of the modelled period, i.e. 2010-258 to 2013-257, and 2015-258 to 2016-258 
+```{r}
+# Qfull is the complete, original streamflow dataset, filtered to start at 2005-09-15 and to replace missing values with -9999
+
+Qfull <- Qload
+
+#Fill missing values with a negative number (for the model input)
+Qfull <- Qfull %>%
+  filter(PARAM==1 & Date>="2005-01-01") %>% 
+  select(-ID, -PARAM)
+Qfull$Value[is.na(Qfull$Value)==TRUE] <- -9999
+
+# Create Qcal which contains only the measured flow during the calibration period
+Qcal1 <- Qfull
+Qcal1 <- filter(Qcal1, Date>="2007-09-15" & Date<="2010-09-14")
+
+Qcal2 <- Qfull
+Qcal2 <- filter(Qcal2, Date >= "2013-09-15" & Date <= "2015-09-14")
+
+Qcal <- rbind(Qcal1, Qcal2)
+Qcal <- rename(Qcal, CalFlow=Value)
+
+# Create Qval which contains only the measured flow during the validation period
+Qval1 <- Qfull
+Qval1 <- filter(Qval1, Date>="2010-09-15" & Date<="2013-09-14")
+
+Qval2 <- Qfull
+Qval2 <- filter(Qval2, Date >= "2015-09-15" & Date <= "2016-09-14")
+
+Qval <- rbind(Qval1, Qval2)
+Qval <- rename(Qval, ValFlow=Value)
+
+# Create the "negative" flow, which changes the sign of flow>0, and represents missing and zero flows with -9999
+Qneg <- mutate(Qfull, Negative=ifelse(Value==0|Value==-9999,-9999,-1*Value))
+Qneg <- select(Qneg, Date, Negative)
+# Qneg_check <- filter(Qneg, Value==-9999)
+# Qneg_check <- filter(Qneg, Value==0)
+
+# Put the negative, calibration, and validation flows together
+Qboth <- merge(Qneg, Qcal,by="Date", all=TRUE )
+Qboth <- select(Qboth, -SYM)
+Qboth <- merge(Qboth, Qval, by="Date", all=TRUE)
+Qboth <- select(Qboth, -SYM)
+
+Qboth$CalAll <- NA
+Qboth$ValAll <- NA
+
+# This section first pastes Cal.Period into Cal anywhere that Cal has an NA value (probaly wouldn't have needed the first step -> could have straight up started with Cal.Period). From that remaining, it pastes the negative streamflow (or missing=0=-9999) into the Cal NA points (which represent all the times outside the cal period)
+Qboth$CalAll <- Qboth$CalFlow
+Qboth$CalAll[is.na(Qboth$CalAll)] <- paste0(Qboth$Negative[is.na(Qboth$CalAll)])
+Qboth$CalAll <- as.double(Qboth$CalAll)
+Qboth$ValAll <- Qboth$ValFlow
+Qboth$ValAll[is.na(Qboth$ValAll)] <- paste0(Qboth$Negative[is.na(Qboth$ValAll)])
+Qboth$ValAll <- as.double(Qboth$ValAll)
+
+QPlot <- Qboth
+QPlot <- mutate(QPlot, CalAll=ifelse(CalAll==-9999,NA,CalAll), ValAll=ifelse(ValAll==-9999,NA,ValAll))
+
+ggplot(data=QPlot, mapping=aes(x=Date))+
+  geom_line(aes(y=CalAll), color="blue", size=1) +
+  scale_x_date(date_labels=("%Y"), date_breaks=("years")) +
+  geom_line(aes(y=ValAll), color="red", size=0.5)+
+  labs(x="Date", y="Discharge")
+
+#Check that the morphed dataset is the same as the original Q dataset
+Qcheck <- Qfull
+Qcheck$Check <- NA
+Qcheck$Check <- abs(QPlot$CalAll)-Qcheck$Value
+CalCheck <- force(unique(Qcheck$Check))
+CalCheck
+
+Qcheck$Check <- abs(QPlot$ValAll)-Qcheck$Value
+ValCheck <- force(unique(Qcheck$Check))
+ValCheck
+
+```
+
+Note one last thing: the model needs a positive value on the start date of the model. Therefore, change the streamflow value on 2006-09-15 to a positive value
+```{r}
+ModelStart <- which(Qboth$Date==as.Date("2006-09-15")) #Returns the line where date=2006=09-15
+
+Qboth$CalAll[ModelStart] <- -1*Qboth$CalAll[ModelStart]
+Qboth$ValAll[ModelStart] <- -1*Qboth$ValAll[ModelStart]
+
+Qboth[ModelStart,]
+
+```
+
+
+
+### Write the streamflow values to file - both an excel .csv file including the date as well, and a .csv file with only the flow values
+```{r}
+setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files")
+QFinal <- select(Qfull, Date, Value)
+QWrite <- select(Qfull, Value)
+write_excel_csv(QFinal, "Streamflow_full.xlsx.csv")
+write_tsv(QWrite, "Streamflow_full.csv", col_names=FALSE)
+
+QFinal <- select(Qboth, Date, CalAll)
+QWrite <- select(Qboth, CalAll)
+write_excel_csv(QFinal, "Streamflow_cal.xlsx.csv")
+write_tsv(QWrite, "Streamflow_cal.csv", col_names=FALSE)
+
+QFinal <- select(Qboth, Date, ValAll)
+QWrite <- select(Qboth, ValAll)
+write_excel_csv(QFinal, "Streamflow_val.xlsx.csv")
+write_tsv(QWrite, "Streamflow_val.csv", col_names=FALSE)
+```
+

@@ -1,0 +1,105 @@
+########################################
+:FileType r2c  ASCII  EnSim 1.0
+#
+# DataType               2D Rect Cell
+#
+:Application             EnSimHydrologic
+:Version                 2.1.23
+:WrittenBy          Haley Brauner, modified from work by D. Princz and H. Mkandla
+:CreationDate       2019-06-18
+#
+#---------------------------------------
+:SourceFileName               Baker.map
+:NominalGridSize_AL     12449.90
+:ContourInterval           1.000
+:ImperviousArea            0.000
+:ClassCount                    2
+:NumRiverClasses               1
+:ElevConversion            1.000
+:TotalNumOfGrids               2
+:numGridsInBasin               1
+:DebugGridNo                   1
+#
+#
+:Projection         LATLONG
+:Ellipsoid          GRS80
+#
+:xOrigin                -115.1050
+:yOrigin                 62.1416
+#
+:AttributeName 1 Rank
+:AttributeName 2 Next
+:AttributeName 3 DA
+:AttributeName 4 Bankfull
+:AttributeName 5 ChnlSlope
+:AttributeName 6 Elev
+:AttributeName 7 ChnlLength
+:AttributeName 8 IAK
+:AttributeName 9 IntSlope
+:AttributeName 10 Chnl
+:AttributeName 11 Reach
+:AttributeName 12 GridArea
+:AttributeName 13 Class  1
+:AttributeName 14 Class  2
+#
+:xCount                        3
+:yCount                        3
+:xDelta                    0.438333
+:yDelta                    0.308400
+#
+:EndHeader
+0 2 0
+0 1 0
+0 0 0
+
+0 0 0
+0 2 0
+0 0 0
+
+0.0 0.0 0.0
+0.0 0.155E3 0.0
+0.0 0.0 0.0
+
+0.0 0.0 0.0
+0.0 999.00 0.0
+0.0 0.0 0.0
+
+0.0 0.0 0.0
+0.0 0.001594 0.0
+0.0 0.0 0.0
+
+0.0 201.4 0.0
+0.0 232.0 0.0
+0.0 0.0 0.0
+
+0.0 0.0 0.0
+0.0 19200.0 0.0
+0.0 0.0 0.0
+
+0 0 0
+0 1 0
+0 0 0
+
+0.0 0.0 0.0
+0.0 0.999 0.0
+0.0 0.0 0.0
+
+0 0 0
+0 1 0
+0 0 0
+
+0 0 0
+0 0 0
+0 0 0
+
+0.0 0.0 0.0
+0.0 1.55E+08 0.0
+0.0 0.0 0.0
+
+0.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 0.0
+
+0.0 0.0 0.0
+0.0 0.0 0.0
+0.0 0.0 0.0

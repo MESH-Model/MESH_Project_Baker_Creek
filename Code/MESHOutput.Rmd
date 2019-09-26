@@ -1,0 +1,1423 @@
+---
+title: "Baker Creek - MESH Output Visualization and Analysis"
+author: "Haley Brauner"
+output: html_notebook
+---
+
+# Introduction
+The purpose of the R notebook is to have a consistent means to visualize, analyze, evaluate, and compare the results of each scenario of the MESH modelling being conducted in the Baker Creek, NWT watershed during the course of this Masters of Water Security Capstone Project.
+
+The general order to this document is:
+- Load in and process the results
+- Plot the desired outputs
+
+# MESH Output Processing
+
+## The Code
+
+### Load Libraries
+```{r}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(CRHMr)
+library(MESHr)
+library(splitstackshape)
+library(plotly)
+```
+
+## Evaluate the results of the calibration scenarios
+
+### Load and check the MESH calibration results
+
+This section gathers the results from each of the 100 trials, creates a table of the NS results for each trial, and plots of the NSE value (vs calibration trial). There is one code chunk per scenario
+```{r}
+### This section works with results from the MESH calibration trials when all the results, saved in ostOutputXXX folders for each trial, are located within a common folder. The only sub-folders in the common folder should be the ostOutputXXX folders
+
+### Currently, the code is copied for each scearnio. May want to update this to make it a function to be run for each scenario with an option within the fuction to rename the variables according to the scenario
+
+####  Scenario 1 Load Calibration Results
+
+folder_S1 <- list.dirs("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Scenario1_Calibrated_1")
+folder_S1 <- folder_S1[-1]
+MetricsFile <- "Metrics_Out.txt"
+CalResultsFile <- "OstModel0.txt"
+
+NSResults_S1 <- data.frame(Trial=1:100, NS=NA, SubFolder=NA, NObs=NA)
+NSEvolve <- data.frame(Run=1:1000)
+
+for (y in 1:length(folder_S1)){
+  OutputDir <- folder_S1[y]
+  setwd(OutputDir)
+  Metrics <- read.table(MetricsFile, header=TRUE)
+  Trial <- str_sub(folder_S1[y], start=-3)
+  Trial <- as.numeric(Trial)
+  NSResults_S1[Trial,2] <- Metrics$NSD[1]
+  NSResults_S1[Trial,3] <- folder_S1[y]
+  
+  # NSE_read <- read.table(CalResultsFile, header=TRUE)
+  # NSE <- NSE_read[,1:2]
+  # NSE <- mutate(NSE, obj.function=obj.function*-1)
+  # NSEvolve <- merge(NSEvolve, NSE, by="Run")
+  # ColNames <- colnames(NSEvolve)
+  # ColNames[y+1] <- str_sub(folder_S1[y], start=-12)
+  # colnames(NSEvolve) <- ColNames
+}
+
+# ColNames <- ColNames[-1]
+# NSEvolve_gathered <- gather(NSEvolve, ColNames, key="Trial", value="NSE")
+# 
+# ggplot(NSEvolve_gathered) + 
+#   geom_line(mapping=aes(x=Run, y=NSE, colour=Trial))+
+#   theme(legend.position="none")
+
+# write.csv(NSEvolve, file="Scenario1NSEvolve.csv")
+
+
+#Add a column for the number of streamflow observations and create a sub-set of the NS Results showing only the runs that ran for the full calibration period
+    #Number of days between 2006-09-15 and 2016-09-14: 3652
+    #Number of days between 2006-09-15 and 2015-09-14: 3286
+for (z in 1:nrow(NSResults_S1)){
+  if (is.na(NSResults_S1$SubFolder[z])==TRUE){
+    next
+  }
+  setwd(NSResults_S1$SubFolder[z])
+  Q<- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold = 1e-6)
+  NSResults_S1$NObs[z] <- nrow(Q)
+}
+Full_Trials_S1 <- filter(NSResults_S1, NObs==3652)
+NFull_S1 <- nrow(Full_Trials_S1)
+NFull_S1
+
+#These next 2 variables store the ranked NS results (from best NS to worst NS) and the ranked (ordered) parameter values. The NS_Full_Ranked dataframe is used to obtain the top 10 best parameter sets for use in validation runs
+NSRanked_S1 <- NSResults_S1[order( as.numeric(as.character(NSResults_S1$NS)), decreasing=TRUE ), ]
+NSFullRanked_S1 <- Full_Trials_S1[order( as.numeric(as.character(Full_Trials_S1$NS)), decreasing=TRUE ), ]
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 1 Full Re-Run Load Calibration Results
+####  
+folder_S1_2 <- list.dirs("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Scenario1_Calibrated_2")
+folder_S1_2 <- folder_S1_2[-1]
+MetricsFile <- "Metrics_Out.txt"
+
+NSResults_S1_2 <- data.frame(Trial=1:100, NS=NA, SubFolder=NA, NObs=NA)
+
+for (y in 1:length(folder_S1_2)){
+  OutputDir <- folder_S1_2[y]
+  setwd(OutputDir)
+  Metrics <- read.table(MetricsFile, header=TRUE)
+  Trial <- str_sub(folder_S1_2[y], start=-3)
+  Trial <- as.numeric(Trial)
+  NSResults_S1_2[Trial,2] <- Metrics$NSD[1]
+  NSResults_S1_2[Trial,3] <- folder_S1_2[y]
+}
+
+#Add a column for the number of streamflow observations
+for (z in 1:nrow(NSResults_S1_2)){
+  if (is.na(NSResults_S1_2$SubFolder[z])==TRUE){
+    next
+  }
+  setwd(NSResults_S1_2$SubFolder[z])
+  Q<- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold = 1e-6)
+  NSResults_S1_2$NObs[z] <- nrow(Q)
+}
+#Add a column for the number of streamflow observations and create a sub-set of the NS Results showing only the runs that ran for the full calibration period
+    #Number of days between 2006-09-15 and 2016-09-14: 3652
+    #Number of days between 2006-09-15 and 2015-09-14: 3286
+Full_Trials_S1_2 <- filter(NSResults_S1_2, NObs>=3286)
+NFull_S1_2 <- nrow(Full_Trials_S1_2)
+NFull_S1_2
+
+#These next 2 variables store the ranked NS results (from best NS to worst NS) and the ranked (ordered) parameter values. The NS_Full_Ranked dataframe is used to obtain the top 10 best parameter sets for use in validation runs
+NSRanked_S1_2 <- NSResults_S1_2[order( as.numeric(as.character(NSResults_S1_2$NS)), decreasing=TRUE ), ]
+NSFullRanked_S1_2 <- Full_Trials_S1_2[order( as.numeric(as.character(Full_Trials_S1_2$NS)), decreasing=TRUE ), ]
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 1 Full Re-Run #2 (S1_3) Load Calibration Results
+####  
+folder_S1_3 <- list.dirs("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Scenario1_Calibrated_3")
+folder_S1_3 <- folder_S1_3[-1]
+MetricsFile <- "Metrics_Out.txt"
+
+NSResults_S1_3 <- data.frame(Trial=1:100, NS=NA, SubFolder=NA, NObs=NA)
+
+for (y in 1:length(folder_S1_3)){
+  OutputDir <- folder_S1_3[y]
+  setwd(OutputDir)
+  Metrics <- read.table(MetricsFile, header=TRUE)
+  Trial <- str_sub(folder_S1_3[y], start=-3)
+  Trial <- as.numeric(Trial)
+  NSResults_S1_3[Trial,2] <- Metrics$NSD[1]
+  NSResults_S1_3[Trial,3] <- folder_S1_3[y]
+}
+
+#Add a column for the number of streamflow observations
+for (z in 1:nrow(NSResults_S1_3)){
+  if (is.na(NSResults_S1_3$SubFolder[z])==TRUE){
+    next
+  }
+  setwd(NSResults_S1_3$SubFolder[z])
+  Q<- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold = 1e-6)
+  NSResults_S1_3$NObs[z] <- nrow(Q)
+}
+#Add a column for the number of streamflow observations and create a sub-set of the NS Results showing only the runs that ran for the full calibration period
+    #Number of days between 2006-09-15 and 2016-09-14: 3652
+    #Number of days between 2006-09-15 and 2015-09-14: 3286
+Full_Trials_S1_3 <- filter(NSResults_S1_3, NObs>=3286)
+NFull_S1_3 <- nrow(Full_Trials_S1_3)
+NFull_S1_3
+
+#These next 2 variables store the ranked NS results (from best NS to worst NS) and the ranked (ordered) parameter values. The NS_Full_Ranked dataframe is used to obtain the top 10 best parameter sets for use in validation runs
+NSRanked_S1_3 <- NSResults_S1_3[order( as.numeric(as.character(NSResults_S1_3$NS)), decreasing=TRUE ), ]
+NSFullRanked_S1_3 <- Full_Trials_S1_3[order( as.numeric(as.character(Full_Trials_S1_3$NS)), decreasing=TRUE ), ]
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 2 Load Calibration Results
+####  
+folder_S2 <- list.dirs("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Scenario2_Calibrated")
+folder_S2 <- folder_S2[-1]
+MetricsFile <- "Metrics_Out.txt"
+
+NSResults_S2 <- data.frame(Trial=1:100, NS=NA, SubFolder=NA, NObs=NA)
+
+for (y in 1:length(folder_S2)){
+  OutputDir <- folder_S2[y]
+  setwd(OutputDir)
+  Metrics <- read.table(MetricsFile, header=TRUE)
+  Trial <- str_sub(folder_S2[y], start=-3)
+  Trial <- as.numeric(Trial)
+  NSResults_S2[Trial,2] <- Metrics$NSD[1]
+  NSResults_S2[Trial,3] <- folder_S2[y]
+}
+
+#Add a column for the number of streamflow observations
+for (z in 1:nrow(NSResults_S2)){
+  if (is.na(NSResults_S2$SubFolder[z])==TRUE){
+    next
+  }
+  setwd(NSResults_S2$SubFolder[z])
+  Q<- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold = 1e-6)
+  NSResults_S2$NObs[z] <- nrow(Q)
+}
+#Add a column for the number of streamflow observations and create a sub-set of the NS Results showing only the runs that ran for the full calibration period
+    #Number of days between 2006-09-15 and 2016-09-14: 3652
+    #Number of days between 2006-09-15 and 2015-09-14: 3286
+Full_Trials_S2 <- filter(NSResults_S2, NObs>=3286)
+NFull_S2 <- nrow(Full_Trials_S2)
+NFull_S2
+
+#These next 2 variables store the ranked NS results (from best NS to worst NS) and the ranked (ordered) parameter values. The NS_Full_Ranked dataframe is used to obtain the top 10 best parameter sets for use in validation runs
+NSRanked_S2 <- NSResults_S2[order( as.numeric(as.character(NSResults_S2$NS)), decreasing=TRUE ), ]
+NSFullRanked_S2 <- Full_Trials_S2[order( as.numeric(as.character(Full_Trials_S2$NS)), decreasing=TRUE ), ]
+```
+
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 3 Load Calibration Results
+####  
+folder_S3 <- list.dirs("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Scenario3_Calibrated")
+folder_S3 <- folder_S3[-1]
+MetricsFile <- "Metrics_Out.txt"
+
+NSResults_S3 <- data.frame(Trial=1:100, NS=NA, SubFolder=NA, NObs=NA)
+
+for (y in 1:length(folder_S3)){
+  OutputDir <- folder_S3[y]
+  setwd(OutputDir)
+  Metrics <- read.table(MetricsFile, header=TRUE)
+  Trial <- str_sub(folder_S3[y], start=-3)
+  Trial <- as.numeric(Trial)
+  NSResults_S3[Trial,2] <- Metrics$NSD[1]
+  NSResults_S3[Trial,3] <- folder_S3[y]
+}
+
+#Add a column for the number of streamflow observations
+for (z in 1:nrow(NSResults_S3)){
+  if (is.na(NSResults_S3$SubFolder[z])==TRUE){
+    next
+  }
+  setwd(NSResults_S3$SubFolder[z])
+  Q<- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold = 1e-6)
+  NSResults_S3$NObs[z] <- nrow(Q)
+}
+#Add a column for the number of streamflow observations and create a sub-set of the NS Results showing only the runs that ran for the full calibration period
+    #Number of days between 2006-09-15 and 2016-09-14: 3652
+    #Number of days between 2006-09-15 and 2015-09-14: 3286
+Full_Trials_S3 <- filter(NSResults_S3, NObs>=3286)
+NFull_S3 <- nrow(Full_Trials_S3)
+NFull_S3
+
+#These next 2 variables store the ranked NS results (from best NS to worst NS) and the ranked (ordered) parameter values. The NS_Full_Ranked dataframe is used to obtain the top 10 best parameter sets for use in validation runs
+NSRanked_S3 <- NSResults_S3[order( as.numeric(as.character(NSResults_S3$NS)), decreasing=TRUE ), ]
+NSFullRanked_S3 <- Full_Trials_S3[order( as.numeric(as.character(Full_Trials_S3$NS)), decreasing=TRUE ), ]
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 1P Load Calibration Results
+####  
+folder_S1P <- list.dirs("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Scenario1_PDM_Calibrated")
+folder_S1P <- folder_S1P[-1]
+MetricsFile <- "Metrics_Out.txt"
+
+NSResults_S1P <- data.frame(Trial=1:100, NS=NA, SubFolder=NA, NObs=NA)
+
+for (y in 1:length(folder_S1P)){
+  OutputDir <- folder_S1P[y]
+  setwd(OutputDir)
+  Metrics <- read.table(MetricsFile, header=TRUE)
+  Trial <- str_sub(folder_S1P[y], start=-3)
+  Trial <- as.numeric(Trial)
+  NSResults_S1P[Trial,2] <- Metrics$NSD[1]
+  NSResults_S1P[Trial,3] <- folder_S1P[y]
+}
+
+#These next 2 variables store the ranked NS results (from best NS to worst NS) and the ranked (ordered) parameter values. The NS_Full_Ranked dataframe is used to obtain the top 10 best parameter sets for use in validation runs
+NSRanked_S1P <- NSResults_S1P[order( as.numeric(as.character(NSResults_S1P$NS)), decreasing=TRUE ), ]
+
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 2P Load Calibration Results
+####  
+folder_S2P <- list.dirs("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Scenario2_PDM_Calibrated")
+folder_S2P <- folder_S2P[-1]
+MetricsFile <- "Metrics_Out.txt"
+
+NSResults_S2P <- data.frame(Trial=1:100, NS=NA, SubFolder=NA, NObs=NA)
+
+for (y in 1:length(folder_S2P)){
+  OutputDir <- folder_S2P[y]
+  setwd(OutputDir)
+  Metrics <- read.table(MetricsFile, header=TRUE)
+  Trial <- str_sub(folder_S2P[y], start=-3)
+  Trial <- as.numeric(Trial)
+  NSResults_S2P[Trial,2] <- Metrics$NSD[1]
+  NSResults_S2P[Trial,3] <- folder_S2P[y]
+}
+
+#These next 2 variables store the ranked NS results (from best NS to worst NS) and the ranked (ordered) parameter values. The NS_Full_Ranked dataframe is used to obtain the top 10 best parameter sets for use in validation runs
+NSRanked_S2P <- NSResults_S2P[order( as.numeric(as.character(NSResults_S2P$NS)), decreasing=TRUE ), ]
+
+```
+
+
+### This chunk contains a function to obtain the parameter sets of the best calibration results
+```{r include=FALSE}
+#Define a function to create a data frame of the optimal parameter values for each trail, calculate the min, max, and 10th and 90th percentile statistics, calculate the normalized values, and plot the parameter identifiability
+ParamIdent <- function(FolderList, ScenarioNumber, XLabSize) {
+for (j in 1:length(FolderList)){
+  Dir <- FolderList[j]
+  setwd(Dir)
+
+  OstOut <- read_lines("OstOutput0.txt")
+  OstOut <- str_replace_all(OstOut,c("best fitness","trials remaining"),c("best_fitness","trials_remaining"))
+  OstOut <- data.frame(OstOut)
+  
+#Extract information from the "Optimal Parameter Set" section (OstBest) and put them all together in one dataframe (OstBestAll)
+StartRow <- which(OstOut[,1]%in%"Optimal Parameter Set")
+EndRow <- which(OstOut[,1]%in%"Summary of Constraints")-2
+
+OstBest <- slice(OstOut,StartRow:EndRow)
+OstBest <- OstBest[-c(1,2),]
+OstBest <- data.frame(OstBest)
+OstBest <- separate(OstBest,1,into=c("Parameter","Value"), sep=":")
+# OstTop10 <- OstBest[-1,]
+
+colnames(OstBest) <- c("Parameter", paste("Trial",j, sep=""))
+# colnames(OstTop10) <- c("Parameter", paste("Trial",j, sep=""))
+
+if (j==1){
+  OstBestAll <- OstBest
+} else {
+  OstBestAll <- merge(OstBestAll, OstBest, by="Parameter")
+  }
+}
+OstBestAll[,1]<- gsub("_","",OstBestAll[,1])
+OstBest <- OstBest
+OstBestAll <- OstBestAll
+assign(paste("OstBestAll", "S", ScenarioNumber,sep=""),OstBestAll, envir=.GlobalEnv)
+  
+OstBestAllTrans <- t(OstBestAll)
+names <- rownames(OstBestAllTrans)
+names <- names[-1]
+colnames(OstBestAllTrans) <- OstBestAllTrans[1,]
+OstBestAllTrans <- OstBestAllTrans[-1,]
+ColNames <- colnames(OstBestAllTrans)
+OstBestAllTrans <- data.frame(apply(OstBestAllTrans,2,function(x) as.numeric(as.character(x))))
+colnames(OstBestAllTrans) <- ColNames
+rownames(OstBestAllTrans) <- names
+
+#Calculate the min and max, as well as the 10th and 90th percentile values for each parameter.
+
+OstBestSummary <- summarise_all(OstBestAllTrans, min)
+OstBestSummary[2,] <- summarise_all(OstBestAllTrans, max)
+OstBestSummary[3,] <- sapply(OstBestAllTrans, quantile, probs=0.10)
+OstBestSummary[4,] <- sapply(OstBestAllTrans, quantile, probs=0.90)
+rownames(OstBestSummary) <- c("Min", "Max", "Tenth", "Ninetieth")
+Param_Names <- colnames(OstBestSummary)
+
+OstBestNormalized <- t(OstBestSummary)
+OstBestNormalized <- data.frame(apply(OstBestNormalized,2,function(x) as.numeric(as.character(x))))
+OstBestNormalized <- OstBestNormalized %>%
+  mutate(Norm_10th=0+(Tenth-Min)*(1-0)/(Max-Min))%>%
+  mutate(Norm_90th=0+(Ninetieth-Min)*(1-0)/(Max-Min)) %>%
+  mutate(Diff=Norm_90th-Norm_10th)
+OstBestNormalized <- cbind(Param_Names, OstBestNormalized)
+
+assign(paste("OstBestNorm_S",ScenarioNumber, sep=""), OstBestNormalized, envir=.GlobalEnv)
+
+}
+```
+
+
+### Calculate Validation NSE
+```{r}
+# Load the measured streamflow and filter down to 2006-09-15 through 2016-09-13
+Q_val_load <- read.csv("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Streamflow_val.xlsx.csv")
+
+Q_val <- Q_val_load
+Q_val[,1] <- as.Date.factor(Q_val[,1])
+colnames(Q_val) <- c("Date", "Q_meas_val")
+Q_val <- filter(Q_val, Date>=as.Date("2006-09-15"), Date<=as.Date("2016-09-13"))
+Q_val <- mutate(Q_val, Q_meas_val=ifelse(Q_meas_val==-9999,NA,Q_meas_val))
+
+ggplot()+
+  geom_line(data=Q_val, mapping=aes(x=Date, y=Q_meas_val))
+
+```
+
+```{r}
+# Scenario 1 ________________________________________________________________________
+# Load the simulated streamflow from the top 10 calibration runs
+for (i in 1:10){
+  setwd(NSRanked_S1$SubFolder[i])
+  Qsim_load <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold=-100)
+  Qsim_load <- select(Qsim_load, -QOMEAS1)
+  colnames(Qsim_load) <- c("Date", paste("Qsim_Top",i, sep="")) 
+
+    if (i==1){
+    Q_Top10_S1 <- Qsim_load
+    } else {
+    Q_Top10_S1 <- merge(Q_Top10_S1, Qsim_load, by="Date")
+  }
+}
+
+# Combine the measured and simulated streamflow and filter out all the missing value dates (which correspond to the spin-up and calibration periods)
+Q_val_S1 <- merge(Q_val, Q_Top10_S1, by="Date")
+Q_val_S1 <- filter(Q_val_S1, Q_meas_val>=0 & is.na(Q_meas_val)==FALSE)
+
+# Write Q_val_S1 to .csv to check calcs below
+# setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files/")
+# write.csv(Q_val_S1, "NSE_Calc_Check.csv")
+
+# Calculate the nash-sutcliffe for each of the Top 10 simulated streamflows
+ValNSES1 <- data.frame(Top10=c(1:10), NSE=NA)
+
+j=1
+for (i in 3:12){
+  QObsAvg <- mean(Q_val_S1$Q_meas_val)
+  QDiffSq <- data.frame((Q_val_S1[,i] - Q_val_S1$Q_meas_val)^2)
+  Numerator <- sum(QDiffSq[,1])
+  QMeanSq <- data.frame((Q_val_S1$Q_meas_val-QObsAvg)^2)
+  Denom <- sum(QMeanSq[,1])
+  ValNSES1[j,2] <- 1-(Numerator/Denom)
+  j=j+1
+}
+```
+
+```{r}
+# Scenario 1_2 (Re-Run) ________________________________________________________________________
+# Load the simulated streamflow from the top 10 calibration runs
+for (i in 1:10){
+  setwd(NSRanked_S1_2$SubFolder[i])
+  Qsim_load <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold=-100)
+  Qsim_load <- select(Qsim_load, -QOMEAS1)
+  colnames(Qsim_load) <- c("Date", paste("Qsim_Top",i, sep="")) 
+
+    if (i==1){
+    Q_Top10_S1_2 <- Qsim_load
+    } else {
+    Q_Top10_S1_2 <- merge(Q_Top10_S1_2, Qsim_load, by="Date")
+  }
+}
+
+# Combine the measured and simulated streamflow and filter out all the missing value dates (which correspond to the spin-up and calibration periods)
+Q_val_S1_2 <- merge(Q_val, Q_Top10_S1_2, by="Date")
+Q_val_S1_2 <- filter(Q_val_S1_2, Q_meas_val>=0 & is.na(Q_meas_val)==FALSE)
+
+# Write Q_val_S1 to .csv to check calcs below
+# setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files/")
+# write.csv(Q_val_S1, "NSE_Calc_Check.csv")
+
+# Calculate the nash-sutcliffe for each of the Top 10 simulated streamflows
+ValNSES1_2 <- data.frame(Top10=c(1:10), NSE=NA)
+
+j=1
+for (i in 3:12){
+  QObsAvg <- mean(Q_val_S1_2$Q_meas_val)
+  QDiffSq <- data.frame((Q_val_S1_2[,i] - Q_val_S1_2$Q_meas_val)^2)
+  Numerator <- sum(QDiffSq[,1])
+  QMeanSq <- data.frame((Q_val_S1_2$Q_meas_val-QObsAvg)^2)
+  Denom <- sum(QMeanSq[,1])
+  ValNSES1_2[j,2] <- 1-(Numerator/Denom)
+  j=j+1
+}
+```
+
+```{r}
+# Scenario 1_3 (Re-Run #2) ________________________________________________________________________
+# Load the simulated streamflow from the top 10 calibration runs
+for (i in 1:10){
+  setwd(NSRanked_S1_3$SubFolder[i])
+  Qsim_load <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold=-100)
+  Qsim_load <- select(Qsim_load, -QOMEAS1)
+  colnames(Qsim_load) <- c("Date", paste("Qsim_Top",i, sep="")) 
+
+    if (i==1){
+    Q_Top10_S1_3 <- Qsim_load
+    } else {
+    Q_Top10_S1_3 <- merge(Q_Top10_S1_3, Qsim_load, by="Date")
+  }
+}
+
+# Combine the measured and simulated streamflow and filter out all the missing value dates (which correspond to the spin-up and calibration periods)
+Q_val_S1_3 <- merge(Q_val, Q_Top10_S1_3, by="Date")
+Q_val_S1_3 <- filter(Q_val_S1_3, Q_meas_val>=0 & is.na(Q_meas_val)==FALSE)
+
+# Write Q_val_S1 to .csv to check calcs below
+# setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files/")
+# write.csv(Q_val_S1, "NSE_Calc_Check.csv")
+
+# Calculate the nash-sutcliffe for each of the Top 10 simulated streamflows
+ValNSES1_3 <- data.frame(Top10=c(1:10), NSE=NA)
+
+j=1
+for (i in 3:12){
+  QObsAvg <- mean(Q_val_S1_3$Q_meas_val)
+  QDiffSq <- data.frame((Q_val_S1_3[,i] - Q_val_S1_3$Q_meas_val)^2)
+  Numerator <- sum(QDiffSq[,1])
+  QMeanSq <- data.frame((Q_val_S1_3$Q_meas_val-QObsAvg)^2)
+  Denom <- sum(QMeanSq[,1])
+  ValNSES1_3[j,2] <- 1-(Numerator/Denom)
+  j=j+1
+}
+```
+
+```{r}
+# Scenario 2 ________________________________________________________________________
+# Load the simulated streamflow from the top 10 calibration runs
+for (i in 1:10){
+  setwd(NSRanked_S2$SubFolder[i])
+  Qsim_load <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold=-100)
+  Qsim_load <- select(Qsim_load, -QOMEAS1)
+  colnames(Qsim_load) <- c("Date", paste("Qsim_Top",i, sep="")) 
+
+    if (i==1){
+    Q_Top10_S2 <- Qsim_load
+    } else {
+    Q_Top10_S2 <- merge(Q_Top10_S2, Qsim_load, by="Date")
+  }
+}
+
+# Combine the measured and simulated streamflow and filter out all the missing value dates (which correspond to the spin-up and calibration periods)
+Q_val_S2 <- merge(Q_val, Q_Top10_S2, by="Date")
+Q_val_S2 <- filter(Q_val_S2, Q_meas_val>=0 & is.na(Q_meas_val)==FALSE)
+
+# Write Q_val_S2 to .csv to check calcs below
+# setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files/")
+# write.csv(Q_val_S2, "NSE_Calc_Check.csv")
+
+# Calculate the nash-sutcliffe for each of the Top 10 simulated streamflows
+ValNSES2 <- data.frame(Top10=c(1:10), NSE=NA)
+
+j=1
+for (i in 3:12){
+  QObsAvg <- mean(Q_val_S2$Q_meas_val)
+  QDiffSq <- data.frame((Q_val_S2[,i] - Q_val_S2$Q_meas_val)^2)
+  Numerator <- sum(QDiffSq[,1])
+  QMeanSq <- data.frame((Q_val_S2$Q_meas_val-QObsAvg)^2)
+  Denom <- sum(QMeanSq[,1])
+  ValNSES2[j,2] <- 1-(Numerator/Denom)
+  j=j+1
+}
+```
+```{r}
+# Scenario 3 ________________________________________________________________________
+# Load the simulated streamflow from the top 10 calibration runs
+for (i in 1:10){
+  setwd(NSRanked_S3$SubFolder[i])
+  Qsim_load <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold=-100)
+  Qsim_load <- select(Qsim_load, -QOMEAS1)
+  colnames(Qsim_load) <- c("Date", paste("Qsim_Top",i, sep="")) 
+
+    if (i==1){
+    Q_Top10_S3 <- Qsim_load
+    } else {
+    Q_Top10_S3 <- merge(Q_Top10_S3, Qsim_load, by="Date")
+  }
+}
+
+# Combine the measured and simulated streamflow and filter out all the missing value dates (which correspond to the spin-up and calibration periods)
+Q_val_S3 <- merge(Q_val, Q_Top10_S3, by="Date")
+Q_val_S3 <- filter(Q_val_S3, Q_meas_val>=0 & is.na(Q_meas_val)==FALSE)
+
+# Write Q_val_S3 to .csv to check calcs below
+# setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files/")
+# write.csv(Q_val_S3, "NSE_Calc_Check.csv")
+
+# Calculate the nash-sutcliffe for each of the Top 10 simulated streamflows
+ValNSES3 <- data.frame(Top10=c(1:10), NSE=NA)
+
+j=1
+for (i in 3:12){
+  QObsAvg <- mean(Q_val_S3$Q_meas_val)
+  QDiffSq <- data.frame((Q_val_S3[,i] - Q_val_S3$Q_meas_val)^2)
+  Numerator <- sum(QDiffSq[,1])
+  QMeanSq <- data.frame((Q_val_S3$Q_meas_val-QObsAvg)^2)
+  Denom <- sum(QMeanSq[,1])
+  ValNSES3[j,2] <- 1-(Numerator/Denom)
+  j=j+1
+}
+```
+```{r}
+# Scenario 1-P ________________________________________________________________________
+# Load the simulated streamflow from the top 10 calibration runs
+for (i in 1:10){
+  setwd(NSRanked_S1P$SubFolder[i])
+  Qsim_load <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold=-100)
+  Qsim_load <- select(Qsim_load, -QOMEAS1)
+  colnames(Qsim_load) <- c("Date", paste("Qsim_Top",i, sep="")) 
+
+    if (i==1){
+    Q_Top10_S1P <- Qsim_load
+    } else {
+    Q_Top10_S1P <- merge(Q_Top10_S1P, Qsim_load, by="Date")
+  }
+}
+
+# Combine the measured and simulated streamflow and filter out all the missing value dates (which correspond to the spin-up and calibration periods)
+Q_val_S1P <- merge(Q_val, Q_Top10_S1P, by="Date")
+Q_val_S1P <- filter(Q_val_S1P, Q_meas_val>=0 & is.na(Q_meas_val)==FALSE)
+
+# Write Q_val_S1P to .csv to check calcs below
+# setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files/")
+# write.csv(Q_val_S1P, "NSE_Calc_Check.csv")
+
+# Calculate the nash-sutcliffe for each of the Top 10 simulated streamflows
+ValNSES1P <- data.frame(Top10=c(1:10), NSE=NA)
+
+j=1
+for (i in 3:12){
+  QObsAvg <- mean(Q_val_S1P$Q_meas_val)
+  QDiffSq <- data.frame((Q_val_S1P[,i] - Q_val_S1P$Q_meas_val)^2)
+  Numerator <- sum(QDiffSq[,1])
+  QMeanSq <- data.frame((Q_val_S1P$Q_meas_val-QObsAvg)^2)
+  Denom <- sum(QMeanSq[,1])
+  ValNSES1P[j,2] <- 1-(Numerator/Denom)
+  j=j+1
+}
+```
+
+```{r}
+# Scenario 2-P ________________________________________________________________________
+# Load the simulated streamflow from the top 10 calibration runs
+for (i in 1:10){
+  setwd(NSRanked_S2P$SubFolder[i])
+  Qsim_load <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv", missingValueThreshold=-100)
+  Qsim_load <- select(Qsim_load, -QOMEAS1)
+  colnames(Qsim_load) <- c("Date", paste("Qsim_Top",i, sep="")) 
+
+    if (i==1){
+    Q_Top10_S2P <- Qsim_load
+    } else {
+    Q_Top10_S2P <- merge(Q_Top10_S2P, Qsim_load, by="Date")
+  }
+}
+
+# Combine the measured and simulated streamflow and filter out all the missing value dates (which correspond to the spin-up and calibration periods)
+Q_val_S2P <- merge(Q_val, Q_Top10_S2P, by="Date")
+Q_val_S2P <- filter(Q_val_S2P, Q_meas_val>=0 & is.na(Q_meas_val)==FALSE)
+
+# Write Q_val_S2P to .csv to check calcs below
+# setwd("F:/ECCC_Project/MESH Model/Baker Creek Model Files/")
+# write.csv(Q_val_S2P, "NSE_Calc_Check.csv")
+
+# Calculate the nash-sutcliffe for each of the Top 10 simulated streamflows
+ValNSES2P <- data.frame(Top10=c(1:10), NSE=NA)
+
+j=1
+for (i in 3:12){
+  QObsAvg <- mean(Q_val_S2P$Q_meas_val)
+  QDiffSq <- data.frame((Q_val_S2P[,i] - Q_val_S2P$Q_meas_val)^2)
+  Numerator <- sum(QDiffSq[,1])
+  QMeanSq <- data.frame((Q_val_S2P$Q_meas_val-QObsAvg)^2)
+  Denom <- sum(QMeanSq[,1])
+  ValNSES2P[j,2] <- 1-(Numerator/Denom)
+  j=j+1
+}
+```
+
+
+# Plots
+
+## Table summary of Trial, NSE for Cal, and NSE for Val
+```{r}
+Perf_Summary <- data.frame(Scenario=c("Scenario 1", "Scenario1_2", "Scenario1_3", "Scenario 2", "Scenario 3", "Scenario 1-P", "Scenario 2-P"), Trial=c(NSRanked_S1$Trial[1],NSRanked_S1_2$Trial[1],NSRanked_S1_3$Trial[1], NSRanked_S2$Trial[1],NSRanked_S3$Trial[1], NSRanked_S1P$Trial[1], NSRanked_S2P$Trial[1]),  Cal_NSE=c(NSRanked_S1$NS[1],NSRanked_S1_2$NS[1],NSRanked_S1_3$NS[1], NSRanked_S2$NS[1],NSRanked_S3$NS[1], NSRanked_S1P$NS[1], NSRanked_S2P$NS[1]),Val_NSE=c(ValNSES1$NSE[1],ValNSES1_2$NSE[1],ValNSES1_3$NSE[1], ValNSES2$NSE[1],ValNSES3$NSE[1], ValNSES1P$NSE[1], ValNSES2P$NSE[1]))
+```
+
+
+## Model Performance for 100 Calibration Runs; All scenarios on the same plot
+```{r}
+#Box plot of the Objective parameter results of the 100 calibration trials
+BoxPlot100 <- ggplot()+
+  # geom_boxplot(data=NSResults_S1, mapping=aes(x="Scenario 1", y=NS))+
+  # geom_boxplot(data=NSResults_S1_2, mapping=aes(x="Scenario 1_2", y=NS))+
+  geom_boxplot(data=NSResults_S1_3, mapping=aes(x="Scenario 1", y=NS))+
+  geom_boxplot(data=NSResults_S1P, mapping=aes(x="Scenario 1-P", y=NS))+
+  ylab("Nash-Sutcliffe")+
+  xlab("") +
+  geom_boxplot(data=NSResults_S2, mapping=aes(x="Scenario 2", y=NS))+
+  geom_boxplot(data=NSResults_S2P, mapping=aes(x="Scenario 2-P", y=NS))+
+  geom_boxplot(data=NSResults_S3, mapping=aes(x="Scenario 3", y=NS))+
+  labs(title="Model Performance in 100 Calibration Trials", subtitle="MESH Model, Baker Creek Watershed")
+
+BoxPlot100 <- BoxPlot100 + theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+BoxPlot100
+
+ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/BoxPlot100.jpg", plot=BoxPlot100, height=9, width=17.75, unit="cm")
+
+# Violin and box plot of the objective parameter results of the 100 calibration trials
+# ggplot()+
+#   geom_violin(data=NSResults_S1_2, mapping=aes(x="Scenario 1_2", y=NS))+
+#   ylab("Nash-Sutcliffe")+
+#   xlab("") +
+#   geom_violin(data=NSResults_S2, mapping=aes(x="Scenario 2", y=NS))+
+#   geom_violin(data=NSResults_S3, mapping=aes(x="Scenario 3", y=NS))+
+#   labs(title="Model Performance in 100 Calibration Trials", subtitle="MESH Model, Baker Creek Watershed")+
+#   geom_boxplot(data=NSResults_S1, mapping=aes(x="Scenario 1", y=NS), width=0.1)+
+#   geom_boxplot(data=NSResults_S1_2, mapping=aes(x="Scenario 1_2", y=NS), width=0.1)+
+#   geom_boxplot(data=NSResults_S2, mapping=aes(x="Scenario 2", y=NS), width=0.1)+
+#   geom_boxplot(data=NSResults_S3, mapping=aes(x="Scenario 3", y=NS), width=0.1)
+  
+# Note: The lower and upper hinges of the boxplot correspond to the first and third quartiles (25th and 75th percentiles). The upper whisker extends from the hinge to a maximum of 1.5* IQR (IQR=distance between the 1st and 3rd quartiles)
+  
+```
+
+
+## Observed vs Simulated Streamflow for the Best Calibration Runs
+Plot observed vs. simulated streamflow for the best calibration run for each scenario
+- Show the NSE on the graph
+- Be sure to label axes and add a title and legend
+
+```{r, eval=FALSE}
+### Scenario 1 Streamflow Plot
+
+# Obtain the full streamflow record (no negative values)
+Q_Full <- read.csv("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Streamflow_full.xlsx.csv", col.names=c("DATE","QMeasFull"))
+Q_Full$DATE <- as.Date(Q_Full$DATE, format="%Y-%m-%d")
+Q_Full <- filter(Q_Full, QMeasFull!=-9999)
+
+# Obtain the calibration streamflow
+BestNS_S1 <- max(NSResults_S1$NS,na.rm=TRUE)
+BestTrial_S1 <- which(NSResults_S1$NS==BestNS_S1)
+BestFolder_S1 <- NSResults_S1[BestTrial_S1,3]
+Timezone <- 'etc/GMT-7'
+
+setwd(BestFolder_S1)
+QCal_S1 <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv",Timezone, missingValueThreshold = 1e-6)
+QCal_S1 <- rename(QCal_S1, Meas=QOMEAS1, SimCal=QOSIM1)
+QCal_S1 <- select(QCal_S1, "DATE", "SimCal")
+
+# Combine the streamflows into one "tidy" dataframe
+Q_S1 <- merge(QCal_S1, Q_Full, by="DATE", all.x=TRUE)
+
+Q_S1_Plot <- gather(Q_S1, SimCal, QMeasFull, key="ObsOrSim", value="Streamflow")
+Q_S1_Plot <- filter(Q_S1_Plot, !is.na(Streamflow))
+Q_S1_Plot <- mutate(Q_S1_Plot,FakeDate=fakeDate(DATE,fakeYear=2000))
+Q_S1_Plot <- mutate(Q_S1_Plot, LineWt=ifelse(Q_S1_Plot$ObsOrSim=="QMeasFull",0.7,0.8), Legend=ifelse(ObsOrSim=="QMeasFull","Measured","Simulated"))
+
+S1Hgraph <- ggplot(data=Q_S1_Plot) +
+  geom_line(mapping=aes(x=DATE, y=Streamflow, color=Legend), size=Q_S1_Plot$LineWt)+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date") +
+  labs(title="Scenario 1 Best Calibrated Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+  scale_fill_discrete(name="Legend", labels=c("Measured", "Simulated"))+
+  geom_rect(aes(xmin=as.Date("2006-09-15"), xmax=as.Date("2007-09-14"), ymin=-1, ymax=10),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-1, ymax=10),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-1, ymax=10),colour="grey50", linetype=2, fill=NA) +
+  annotate("text", label="Spin-up", x=as.Date("2007-03-15"), y=11, size=3.5) +
+  annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=11, size=3.5) +
+  annotate("text", label="Validation", x=as.Date("2012-03-15"), y=11, size=3.5) +
+  annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=11, size=3.5)+
+  annotate("text", label="Validation", x=as.Date("2016-07-15"), y=11, size=3.5) +
+  ylim(-1,30)+
+  annotate("text", label="Calibration Period", x=as.Date("2015-03-15"), y=29, size=3.5)+
+  annotate("text", label=paste("NSE= ",round(NSRanked_S1$NS[1],digits=2), sep=""), x=as.Date("2015-03-15"), y=27, size=3.5)+
+  annotate("text", label="Validation Period", x=as.Date("2015-03-15"), y=25, size=3.5)+
+  annotate("text", label=paste("NSE= ",round(ValNSES1$NSE[1],digits=2), sep=""), x=as.Date("2015-03-15"), y=23, size=3.5)+
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2016-09-14"), ymin=21, ymax=30),colour="black", linetype=1, fill=NA)+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+  # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+  # ylim(0,5)
+
+S1Hgraph
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("S1Hydrograph.jpg", plot=S1Hgraph, width=17.75, height=9, units="cm")
+  
+  
+# LogQPlot_S1 <- ggplot(data=Q_S1_Plot) +
+#   geom_line(mapping=aes(x=DATE, y=Streamflow, color=ObsOrSim))+
+#   ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+#   xlab("Date") +
+#   labs(title="Scenario 1 Calibration Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+#   geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-1, ymax=10),colour="black", fill=NA) +
+#   annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=12, size=3.5) +
+#   geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-1, ymax=10),colour="black", fill=NA, ) +
+#   annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=12, size=3.5)+
+#   scale_y_log10()
+# 
+# LogQPlot_S1
+
+
+```
+```{r, eval=FALSE}
+### Scenario 1_2 Streamflow Plot
+
+# Obtain the full streamflow record (no negative values)
+Q_Full <- read.csv("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Streamflow_full.xlsx.csv", col.names=c("DATE","QMeasFull"))
+Q_Full$DATE <- as.Date(Q_Full$DATE, format="%Y-%m-%d")
+Q_Full <- filter(Q_Full, QMeasFull!=-9999)
+
+# Obtain the calibration streamflow
+BestNS_S1_2 <- max(NSResults_S1_2$NS,na.rm=TRUE)
+BestTrial_S1_2 <- which(NSResults_S1_2$NS==BestNS_S1_2)
+BestFolder_S1_2 <- NSResults_S1_2[BestTrial_S1_2,3]
+Timezone <- 'etc/GMT-7'
+
+setwd(BestFolder_S1_2)
+QCal_S1_2 <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv",Timezone, missingValueThreshold = 1e-6)
+QCal_S1_2 <- rename(QCal_S1_2, Meas=QOMEAS1, SimCal=QOSIM1)
+QCal_S1_2 <- select(QCal_S1_2, "DATE", "SimCal")
+
+# Combine the streamflows into one "tidy" dataframe
+Q_S1_2 <- merge(QCal_S1_2, Q_Full, by="DATE", all.x=TRUE)
+
+Q_S1_2_Plot <- gather(Q_S1_2, SimCal, QMeasFull, key="ObsOrSim", value="Streamflow")
+Q_S1_2_Plot <- filter(Q_S1_2_Plot, !is.na(Streamflow))
+Q_S1_2_Plot <- mutate(Q_S1_2_Plot,FakeDate=fakeDate(DATE,fakeYear=2000))
+Q_S1_2_Plot <- mutate(Q_S1_2_Plot, LineWt=ifelse(Q_S1_2_Plot$ObsOrSim=="QMeasFull",0.7,0.8), Legend=ifelse(ObsOrSim=="QMeasFull","Measured","Simulated"))
+
+S1_2Hgraph <- ggplot(data=Q_S1_2_Plot) +
+  geom_line(mapping=aes(x=DATE, y=Streamflow, color=Legend), size=Q_S1_2_Plot$LineWt)+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date") +
+  labs(title="Scenario 1_2 Best Calibrated Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+  scale_fill_discrete(name="Legend", labels=c("Measured", "Simulated"))+
+  geom_rect(aes(xmin=as.Date("2006-09-15"), xmax=as.Date("2007-09-14"), ymin=-1, ymax=10),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-1, ymax=10),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-1, ymax=10),colour="grey50", linetype=2, fill=NA) +
+  annotate("text", label="Spin-up", x=as.Date("2007-03-15"), y=11, size=3.5) +
+  annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=11, size=3.5) +
+  annotate("text", label="Validation", x=as.Date("2012-03-15"), y=11, size=3.5) +
+  annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=11, size=3.5)+
+  annotate("text", label="Validation", x=as.Date("2016-07-15"), y=11, size=3.5) +
+  ylim(-1,30)+
+  annotate("text", label="Calibration Period", x=as.Date("2015-03-15"), y=29, size=3.5)+
+  annotate("text", label=paste("NSE= ",round(NSRanked_S1_2$NS[1],digits=2), sep=""), x=as.Date("2015-03-15"), y=27, size=3.5)+
+  annotate("text", label="Validation Period", x=as.Date("2015-03-15"), y=25, size=3.5)+
+  annotate("text", label=paste("NSE= ",round(ValNSES1_2$NSE[1],digits=2), sep=""), x=as.Date("2015-03-15"), y=23, size=3.5)+
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2016-09-14"), ymin=21, ymax=30),colour="black", linetype=1, fill=NA)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+S1_2Hgraph
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("S1_2Hydrograph.jpg", plot=S1_2Hgraph, width=17.75, height=9, units="cm")
+
+  # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+  # ylim(0,5)+
+```
+
+```{r}
+### Scenario 1_3 Streamflow Plot
+
+# Obtain the full streamflow record (no negative values)
+Q_Full <- read.csv("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Streamflow_full.xlsx.csv", col.names=c("DATE","QMeasFull"))
+Q_Full$DATE <- as.Date(Q_Full$DATE, format="%Y-%m-%d")
+Q_Full <- filter(Q_Full, QMeasFull!=-9999)
+
+# Obtain the calibration streamflow
+BestNS_S1_3 <- max(NSResults_S1_3$NS,na.rm=TRUE)
+BestTrial_S1_3 <- which(NSResults_S1_3$NS==BestNS_S1_3)
+BestFolder_S1_3 <- NSResults_S1_3[BestTrial_S1_3,3]
+Timezone <- 'etc/GMT-7'
+
+setwd(BestFolder_S1_3)
+QCal_S1_3 <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv",Timezone, missingValueThreshold = 1e-6)
+QCal_S1_3 <- rename(QCal_S1_3, Meas=QOMEAS1, SimCal=QOSIM1)
+QCal_S1_3 <- select(QCal_S1_3, "DATE", "SimCal")
+
+# Combine the streamflows into one "tidy" dataframe
+Q_S1_3 <- merge(QCal_S1_3, Q_Full, by="DATE", all.x=TRUE)
+
+Q_S1_3_Plot <- gather(Q_S1_3, SimCal, QMeasFull, key="ObsOrSim", value="Streamflow")
+Q_S1_3_Plot <- filter(Q_S1_3_Plot, !is.na(Streamflow))
+Q_S1_3_Plot <- mutate(Q_S1_3_Plot,FakeDate=fakeDate(DATE,fakeYear=2000))
+Q_S1_3_Plot <- mutate(Q_S1_3_Plot, LineWt=ifelse(Q_S1_3_Plot$ObsOrSim=="QMeasFull",0.7,0.8), Legend=ifelse(ObsOrSim=="QMeasFull","Measured","Simulated"))
+
+S1_3Hgraph <- ggplot(data=Q_S1_3_Plot) +
+  geom_line(mapping=aes(x=DATE, y=Streamflow, color=Legend), size=Q_S1_3_Plot$LineWt)+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date") +
+  labs(title="Scenario 1 Best Calibrated Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+  scale_fill_discrete(name="Legend", labels=c("Measured", "Simulated"))+
+  geom_rect(aes(xmin=as.Date("2006-09-15"), xmax=as.Date("2007-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  annotate("text", label="Spin-up", x=as.Date("2007-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Validation", x=as.Date("2012-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=5.5, size=3.2)+
+  annotate("text", label="Validation", x=as.Date("2016-07-15"), y=5.5, size=3.2) +
+  ylim(-0.5,10)+
+  annotate("text", label=paste("Calibration NSE = ",round(NSRanked_S1_3$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7.75, size=3.2)+
+  annotate("text", label=paste("Validation NSE = ",round(ValNSES1_3$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7, size=3.2)+
+  geom_rect(aes(xmin=as.Date("2013-01-01"), xmax=as.Date("2016-01-01"), ymin=6.5, ymax=8.25),colour="black", linetype=1, fill=NA)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+  # annotate("text", label="Calibration Period", x=as.Date("2015-03-15"), y=16, size=3.2)+
+  # annotate("text", label=paste("NSE = ",round(NSRanked_S1_3$NS[1],digits=2), sep=""), x=as.Date("2015-03-15"), y=15, size=3.2)+
+  #   annotate("text", label="Validation Period", x=as.Date("2015-03-15"), y=14, size=3.2)+
+  # annotate("text", label=paste("NSE = ",round(ValNSES1_3$NSE[1],digits=2), sep=""), x=as.Date("2015-03-15"), y=13, size=3.2)+
+
+S1_3Hgraph
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("S1_3Hydrograph.jpg", plot=S1_3Hgraph, width=17.75, height=9, units="cm")
+
+  # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+  # ylim(0,5)+
+```
+
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 2 Streamflow Plot
+####  
+
+# Obtain the full streamflow record (no negative values)
+# See above
+
+# Obtain the calibration streamflow
+BestNS_S2 <- max(NSResults_S2$NS,na.rm=TRUE)
+BestTrial_S2 <- which(NSResults_S2$NS==BestNS_S2)
+BestFolder_S2 <- NSResults_S2[BestTrial_S2,3]
+Timezone <- 'etc/GMT-7'
+
+setwd(BestFolder_S2)
+QCal_S2 <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv",Timezone, missingValueThreshold = 1e-6)
+QCal_S2 <- rename(QCal_S2, Meas=QOMEAS1, SimCal=QOSIM1)
+QCal_S2 <- select(QCal_S2, "DATE", "SimCal")
+
+
+# Combine the streamflows into one "tidy" dataframe
+Q_S2 <- merge(QCal_S2, Q_Full, by="DATE", all.x=TRUE)
+
+Q_S2_Plot <- gather(Q_S2, SimCal, QMeasFull, key="ObsOrSim", value="Streamflow")
+Q_S2_Plot <- filter(Q_S2_Plot, !is.na(Streamflow))
+Q_S2_Plot <- mutate(Q_S2_Plot,FakeDate=fakeDate(DATE,fakeYear=2000))
+Q_S2_Plot <- mutate(Q_S2_Plot, LineWt=ifelse(Q_S2_Plot$ObsOrSim=="QMeasFull",0.7,0.8), Legend=ifelse(ObsOrSim=="QMeasFull","Measured","Simulated"))
+
+S2Hgraph <- ggplot(data=Q_S2_Plot) +
+  geom_line(mapping=aes(x=DATE, y=Streamflow, color=Legend), size=Q_S2_Plot$LineWt)+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date") +
+  labs(title="Scenario 2 Best Calibrated Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+  scale_fill_discrete(name="Legend", labels=c("Measured", "Simulated"))+
+  geom_rect(aes(xmin=as.Date("2006-09-15"), xmax=as.Date("2007-09-14"), ymin=-0.5, ymax=8),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  annotate("text", label="Spin-up", x=as.Date("2007-03-15"), y=8.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Validation", x=as.Date("2012-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=5.5, size=3.2)+
+  annotate("text", label="Validation", x=as.Date("2016-07-15"), y=5.5, size=3.2) +
+  ylim(-0.5,10)+
+  annotate("text", label=paste("Calibration NSE = ",round(NSRanked_S2$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7.75, size=3.2)+
+  annotate("text", label=paste("Validation NSE = ",round(ValNSES2$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7, size=3.2)+
+  geom_rect(aes(xmin=as.Date("2013-01-01"), xmax=as.Date("2016-01-01"), ymin=6.5, ymax=8.25),colour="black", linetype=1, fill=NA)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+S2Hgraph
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("S2Hydrograph.jpg", plot=S2Hgraph, width=17.75, height=9, units="cm")
+
+  # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+  # ylim(0,5)
+
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 3 Streamflow Plot
+####  
+
+# Obtain the full streamflow record (no negative values)
+# Q_Full
+
+# Obtain the calibration streamflow
+BestNS_S3 <- max(NSResults_S3$NS,na.rm=TRUE)
+BestTrial_S3 <- which(NSResults_S3$NS==BestNS_S3)
+BestFolder_S3 <- NSResults_S3[BestTrial_S3,3]
+Timezone <- 'etc/GMT-7'
+
+setwd(BestFolder_S3)
+QCal_S3 <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv",Timezone, missingValueThreshold = 1e-6)
+QCal_S3 <- rename(QCal_S3, Meas=QOMEAS1, SimCal=QOSIM1)
+QCal_S3 <- select(QCal_S3, "DATE", "SimCal")
+
+
+# Combine the streamflows into one "tidy" dataframe
+Q_S3 <- merge(QCal_S3, Q_Full, by="DATE", all.x=TRUE)
+
+Q_S3_Plot <- gather(Q_S3, SimCal, QMeasFull, key="ObsOrSim", value="Streamflow")
+Q_S3_Plot <- filter(Q_S3_Plot, !is.na(Streamflow))
+Q_S3_Plot <- mutate(Q_S3_Plot,FakeDate=fakeDate(DATE,fakeYear=2000))
+Q_S3_Plot <- mutate(Q_S3_Plot, LineWt=ifelse(Q_S3_Plot$ObsOrSim=="QMeasFull",0.7,0.8), Legend=ifelse(ObsOrSim=="QMeasFull","Measured","Simulated"))
+
+S3Hgraph <- ggplot(data=Q_S3_Plot) +
+  geom_line(mapping=aes(x=DATE, y=Streamflow, color=Legend), size=Q_S3_Plot$LineWt)+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date") +
+  labs(title="Scenario 3 Best Calibrated Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+  scale_fill_discrete(name="Legend", labels=c("Measured", "Simulated"))+
+  geom_rect(aes(xmin=as.Date("2006-09-15"), xmax=as.Date("2007-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  annotate("text", label="Spin-up", x=as.Date("2007-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Validation", x=as.Date("2012-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=5.5, size=3.2)+
+  annotate("text", label="Validation", x=as.Date("2016-07-15"), y=5.5, size=3.2) +
+  ylim(-0.5,10)+
+  annotate("text", label=paste("Calibration NSE = ",round(NSRanked_S3$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7.75, size=3.2)+
+  annotate("text", label=paste("Validation NSE = ",round(ValNSES3$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7, size=3.2)+
+  geom_rect(aes(xmin=as.Date("2013-01-01"), xmax=as.Date("2016-01-01"), ymin=6.5, ymax=8.25),colour="black", linetype=1, fill=NA)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+S3Hgraph 
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("S3Hydrograph.jpg", plot=S3Hgraph, width=17.75, height=9, units="cm")
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 1P Streamflow Plot
+####  
+
+# Obtain the full streamflow record (no negative values)
+# Q_Full
+
+# Obtain the calibration streamflow
+BestNS_S1P <- max(NSResults_S1P$NS,na.rm=TRUE)
+BestTrial_S1P <- which(NSResults_S1P$NS==BestNS_S1P)
+BestFolder_S1P <- NSResults_S1P[BestTrial_S1P,3]
+Timezone <- 'etc/GMT-7'
+
+setwd(BestFolder_S1P)
+QCal_S1P <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv",Timezone, missingValueThreshold = 1e-6)
+QCal_S1P <- rename(QCal_S1P, Meas=QOMEAS1, SimCal=QOSIM1)
+QCal_S1P <- select(QCal_S1P, "DATE", "SimCal")
+
+
+# Combine the streamflows into one "tidy" dataframe
+Q_S1P <- merge(QCal_S1P, Q_Full, by="DATE", all.x=TRUE)
+
+Q_S1P_Plot <- gather(Q_S1P, SimCal, QMeasFull, key="ObsOrSim", value="Streamflow")
+Q_S1P_Plot <- filter(Q_S1P_Plot, !is.na(Streamflow))
+Q_S1P_Plot <- mutate(Q_S1P_Plot,FakeDate=fakeDate(DATE,fakeYear=2000))
+Q_S1P_Plot <- mutate(Q_S1P_Plot, LineWt=ifelse(Q_S1P_Plot$ObsOrSim=="QMeasFull",0.7,0.8), Legend=ifelse(ObsOrSim=="QMeasFull","Measured","Simulated"))
+
+S1PHgraph <- ggplot(data=Q_S1P_Plot) +
+  geom_line(mapping=aes(x=DATE, y=Streamflow, color=Legend), size=Q_S1P_Plot$LineWt)+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date") +
+  labs(title="Scenario 1-P Best Calibrated Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+  scale_fill_discrete(name="Legend", labels=c("Measured", "Simulated"))+
+  geom_rect(aes(xmin=as.Date("2006-09-15"), xmax=as.Date("2007-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  annotate("text", label="Spin-up", x=as.Date("2007-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Validation", x=as.Date("2012-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=5.5, size=3.2)+
+  annotate("text", label="Validation", x=as.Date("2016-07-15"), y=5.5, size=3.2) +
+  ylim(-0.5,10)+
+  annotate("text", label=paste("Calibration NSE = ",round(NSRanked_S1P$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7.75, size=3.2)+
+  annotate("text", label=paste("Validation NSE = ",round(ValNSES1P$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7, size=3.2)+
+  geom_rect(aes(xmin=as.Date("2013-01-01"), xmax=as.Date("2016-01-01"), ymin=6.5, ymax=8.25),colour="black", linetype=1, fill=NA)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+S1PHgraph 
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("S1PHydrograph.jpg", plot=S1PHgraph, width=17.75, height=9, units="cm")
+```
+
+```{r}
+#____________________________________________________________________________________________
+####  Scenario 2P Streamflow Plot
+####  
+
+# Obtain the full streamflow record (no negative values)
+# Q_Full
+
+# Obtain the calibration streamflow
+BestNS_S2P <- max(NSResults_S2P$NS,na.rm=TRUE)
+BestTrial_S2P <- which(NSResults_S2P$NS==BestNS_S2P)
+BestFolder_S2P <- NSResults_S2P[BestTrial_S2P,3]
+Timezone <- 'etc/GMT-7'
+
+setwd(BestFolder_S2P)
+QCal_S2P <- read_MESH_OutputTimeseries_csv("MESH_output_streamflow.csv",Timezone, missingValueThreshold = 1e-6)
+QCal_S2P <- rename(QCal_S2P, Meas=QOMEAS1, SimCal=QOSIM1)
+QCal_S2P <- select(QCal_S2P, "DATE", "SimCal")
+
+
+# Combine the streamflows into one "tidy" dataframe
+Q_S2P <- merge(QCal_S2P, Q_Full, by="DATE", all.x=TRUE)
+
+Q_S2P_Plot <- gather(Q_S2P, SimCal, QMeasFull, key="ObsOrSim", value="Streamflow")
+Q_S2P_Plot <- filter(Q_S2P_Plot, !is.na(Streamflow))
+Q_S2P_Plot <- mutate(Q_S2P_Plot,FakeDate=fakeDate(DATE,fakeYear=2000))
+Q_S2P_Plot <- mutate(Q_S2P_Plot, LineWt=ifelse(Q_S2P_Plot$ObsOrSim=="QMeasFull",0.7,0.8), Legend=ifelse(ObsOrSim=="QMeasFull","Measured","Simulated"))
+
+S2PHgraph <- ggplot(data=Q_S2P_Plot) +
+  geom_line(mapping=aes(x=DATE, y=Streamflow, color=Legend), size=Q_S2P_Plot$LineWt)+
+  ylab(expression(paste("Streamflow (m", ""^{3}, "/s)", sep = ""))) +
+  xlab("Date") +
+  labs(title="Scenario 2-P Best Calibrated Streamflow", subtitle="MESH Model, Baker Creek Watershed") +
+  scale_fill_discrete(name="Legend", labels=c("Measured", "Simulated"))+
+  geom_rect(aes(xmin=as.Date("2006-09-15"), xmax=as.Date("2007-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2007-09-15"), xmax=as.Date("2010-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  geom_rect(aes(xmin=as.Date("2013-09-15"), xmax=as.Date("2015-09-14"), ymin=-0.5, ymax=5),colour="grey50", linetype=2, fill=NA) +
+  annotate("text", label="Spin-up", x=as.Date("2007-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2009-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Validation", x=as.Date("2012-03-15"), y=5.5, size=3.2) +
+  annotate("text", label="Calibration", x=as.Date("2014-09-15"), y=5.5, size=3.2)+
+  annotate("text", label="Validation", x=as.Date("2016-07-15"), y=5.5, size=3.2) +
+  ylim(-0.5,10)+
+  annotate("text", label=paste("Calibration NSE = ",round(NSRanked_S2P$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7.75, size=3.2)+
+  annotate("text", label=paste("Validation NSE = ",round(ValNSES2P$NS[1],digits=2), sep=""), x=as.Date("2014-06-15"), y=7, size=3.2)+
+  geom_rect(aes(xmin=as.Date("2013-01-01"), xmax=as.Date("2016-01-01"), ymin=6.5, ymax=8.25),colour="black", linetype=1, fill=NA)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+S2PHgraph 
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("S2PHydrograph.jpg", plot=S2PHgraph, width=17.75, height=9, units="cm")
+```
+
+## Water Balance Plots for the Best Calibration Runs
+```{r}
+WBFile <- "Basin_average_water_balance.csv"
+
+# BestFolder_S1 <- NSRanked_S1$SubFolder[1]
+# setwd(BestFolder_S1)
+# WBOut_S1 <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+# WB_S1 <- MESHr::basinWaterBalancePlot(WBOut_S1)
+# SNO_S1 <- MESHr::basinSnowPlot(WBOut_S1)
+# WB_S1 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 1", subtitle="MESH Model, Baker Creek Watershed")+
+#   # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+#   ylim(-1000,1500)
+# 
+# SNO_S1
+# 
+# BestFolder_S1_2 <- NSRanked_S1_2$SubFolder[1]
+# setwd(BestFolder_S1_2)
+# WBOut_S1_2 <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+# WB_S1_2 <- MESHr::basinWaterBalancePlot(WBOut_S1_2)
+# WB_S1_2 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 1_2", subtitle="MESH Model, Baker Creek Watershed")+
+#   xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+#   ylim(-500,1500)
+
+BestFolder_S1_3 <- NSRanked_S1_3$SubFolder[1]
+setwd(BestFolder_S1_3)
+WBOut_S1_3 <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+WB_S1_3 <- MESHr::basinWaterBalancePlot(WBOut_S1_3)
+WB_S1_3 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 1", subtitle="MESH Model, Baker Creek Watershed")
+  # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+  # ylim(-500,1500)
+
+BestFolder_S2 <- NSRanked_S2$SubFolder[1]
+setwd(BestFolder_S2)
+WBOut_S2 <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+WB_S2 <- MESHr::basinWaterBalancePlot(WBOut_S2)
+WB_S2 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 2", subtitle="MESH Model, Baker Creek Watershed")
+  # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
+  # ylim(-500,1500)
+
+BestFolder_S3 <- NSRanked_S3$SubFolder[1]
+setwd(BestFolder_S3)
+WBOut_S3 <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+WB_S3 <- MESHr::basinWaterBalancePlot(WBOut_S3)
+WB_S3 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 3", subtitle="MESH Model, Baker Creek Watershed")
+
+BestFolder_S1P <- NSRanked_S1P$SubFolder[1]
+setwd(BestFolder_S1P)
+WBOut_S1P <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+WB_S1P <- MESHr::basinWaterBalancePlot(WBOut_S1P)
+WB_S1P + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 1-P", subtitle="MESH Model, Baker Creek Watershed")
+
+BestFolder_S2P <- NSRanked_S2P$SubFolder[1]
+setwd(BestFolder_S2P)
+WBOut_S2P <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+WB_S2P <- MESHr::basinWaterBalancePlot(WBOut_S2P)
+WB_S2P + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 2-P", subtitle="MESH Model, Baker Creek Watershed")
+
+
+
+```
+
+### Q.How did the top 10% of calibration runs compare to the validation runs?
+Create a box-whisker plot of the NSE values vs each calibration and validation period for the top 10% (10/100) calibration runs
+
+```{r}
+NSTop10 <- NSRanked_S1_3[c(1:10),2]
+# NSTop10 <- cbind(NSTop10, ValNSES1[c(1:10),2])
+# NSTop10 <- cbind(NSTop10, NSRanked_S1_2[c(1:10),2])
+# NSTop10 <- cbind(NSTop10, ValNSES1_2[c(1:10),2])
+# NSTop10 <- cbind(NSTop10, NSRanked_S1_3[c(1:10),2])
+NSTop10 <- cbind(NSTop10, ValNSES1_3[c(1:10),2])
+NSTop10 <- cbind(NSTop10, NSRanked_S2[c(1:10),2])
+NSTop10 <- cbind(NSTop10, ValNSES2[c(1:10),2])
+NSTop10 <- cbind(NSTop10, NSRanked_S3[c(1:10),2])
+NSTop10 <- cbind(NSTop10, ValNSES3[c(1:10),2])
+NSTop10 <- cbind(NSTop10, NSRanked_S1P[c(1:10),2])
+NSTop10 <- cbind(NSTop10, ValNSES1P[c(1:10),2])
+NSTop10 <- cbind(NSTop10, NSRanked_S2P[c(1:10),2])
+NSTop10 <- cbind(NSTop10, ValNSES2P[c(1:10),2])
+NSTop10 <- as.data.frame(NSTop10)
+colnames(NSTop10) <- c("S1_Cal", "S1_Val","S2_Cal", "S2_Val","S3_Cal", "S3_Val", "S1P_Cal", "S1P_Val", "S2P_Cal", "S2P_Val")
+
+
+Top10Box <- ggplot(stack(NSTop10), aes(x = ind, y = values)) +
+  geom_boxplot()+
+  labs(title="Performance of the Top 10% of Calibration Runs", subtitle="MESH Model, Baker Creek Watershed")+
+  ylab("Nash-Sutcliffe Efficiency")+
+  xlab(NULL)+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+Top10Box
+
+setwd("F:/ECCC_Project/Report/MWSCapstoneReport/figures")
+ggsave("Top10Box.jpg", plot=Top10Box, width=17.75, height=9, units="cm")
+
+
+```
+
+### Ranked model performance for 100 calibration runs
+```{r}
+AllRanked <- data.frame(Runs=c(100:1))
+# AllRanked <- cbind(AllRanked, NSRanked_S1$NS)
+# AllRanked <- cbind(AllRanked, NSRanked_S1_2$NS)
+AllRanked <- cbind(AllRanked, NSRanked_S1_3$NS)
+AllRanked <- cbind(AllRanked, NSRanked_S2$NS)
+AllRanked <- cbind(AllRanked, NSRanked_S3$NS)
+AllRanked <- cbind(AllRanked, NSRanked_S1P$NS)
+AllRanked <- cbind(AllRanked, NSRanked_S2P$NS)
+colnames(AllRanked) <- c("Runs", "S1", "S2", "S3", "S1P", "S2P")
+AllRanked <- gather(AllRanked, S1, S2, S3, S1P, S2P, key="Scenario", value="NS")
+AllRanked$LnTyp <- ifelse(AllRanked$Scenario=="S1","a",ifelse(AllRanked$Scenario=="S2","b","d"))
+AllRanked$Scenario <- factor(AllRanked$Scenario, levels=c("S1P", "S2P", "S3", "S2", "S1"))
+
+RankedPlot <- ggplot()+
+  geom_line(data=AllRanked, mapping=aes(x=Runs, y=NS, color=Scenario, linetype=Scenario), size=1)+
+  labs(title="Ranked Model Calibration Performance", subtitle="MESH Model, Baker Creek Watershed", x="Ranked Model Calibration Runs", y="Nash-Sutcliffe Value")+
+  scale_x_continuous(breaks=seq(0,100, by=10))+
+  theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+RankedPlot
+
+ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/RankedPerf.jpg", plot=RankedPlot, width=17.75, height=9, unit="cm")
+```
+
+
+### Q. What was the tradeoff between model run time and model performance?
+Create a plot showing the NSE and the run time for each configuration. Does it compare with Herbert's results?
+```{r}
+#Plot calibration NSE, Validation NSE, and run time (2 y-axis)
+####Need to update with which Scenario 1 Calibration was actually used, as well as the PDMROF results
+library(ggpubr)
+
+Perf <- data.frame(Scenario=c(1,2,3,"1P", "2P"), Calibration = c(NSRanked_S1_3$NS[1],NSRanked_S2$NS[1],NSRanked_S3$NS[1], NSRanked_S1P$NS[1], NSRanked_S2P$NS[1]), Validation=c(ValNSES1_3$NSE[1], ValNSES2$NSE[1],ValNSES3$NSE[1], ValNSES1P$NSE[1], ValNSES2P$NSE[1]), AvgTime=c(4.714,9.862,35.711, "7.036", "12.402"))
+
+#Times taken from the start time at the beginning of one of the slurm files to the time of the last-finished trial divided by the number of trials per folder
+
+Perf_Plot <- gather(Perf, "Calibration", "Validation", key="Performance", value="NS")
+
+### CAN'T GET THE PLOTS TO WORK OUT; PLOTTED IN EXCEL INSTEAD
+
+# brp <- ggplot()+
+#   geom_bar(data=Perf_Plot, mapping=aes(x=Scenario, y=NS, fill=Performance), stat="identity", position=position_dodge())+
+#   ylim(-0.5,0.5)+
+#   scale_fill_discrete(name=NULL)+
+#   ylab("Best Nash-Sutcliffe Value")+
+#   labs(title="Model Performance and Run Time", subtitle="MESH Model, Baker Creek Watershed")+
+#   theme(legend.position="top")
+# 
+# lnp <- ggplot()+
+#   # geom_line(data=Perf, mapping=aes(x=Scenario, y=AvgTime))+
+#   geom_point(data=Perf, mapping=aes(x=Scenario, y=AvgTime))+
+#   # scale_x_discrete(name="Scenario")+
+#   # xlim("1", "1-P", "2", "2-P", "3")+
+#   ylab("Average Model Run Time (1 Calibration)")+
+#   theme(legend.position="bottom")
+# 
+# xform <- list(categoryorder = "array", categoryarray=c(1,2,3,"1P", "2P"))
+# 
+# plot_ly(data=Perf, x=~Scenario) %>%
+#   add_trace(y = ~Calibration, type = 'bar', name = "Calibration")%>%
+#   add_trace(y = ~Validation, type = 'bar', name = "Validation")%>%
+#   add_lines(y = ~AvgTime, name = 'Simulation Time', yaxis = 'y2', line = list(color = '#45171D')) %>%
+#   layout(title = 'Model Performance versus Simulation Time',
+#          xaxis = xform,
+#          yaxis = list(side = 'left', title = 'Nash-Sutcliffe Value', showgrid = TRUE, zeroline = TRUE),
+#          yaxis2 = list(side = 'right', overlaying = "y", title = 'Average Simulation Time (minutes)', showgrid = FALSE, zeroline = FALSE))
+# 
+# type='scatter', mode = 'lines+markers',
+# 
+# brpAll
+# 
+# ggplot()+
+#   geom_bar(data=Perf_Plot, mapping=aes(x=Scenario, y=NS, fill=Performance), stat="identity", position=position_dodge())+
+#   ylim(-0.5,0.5)+
+#   scale_fill_discrete(name=NULL)+
+#   geom_point(data=Perf, mapping=aes(x=Scenario, y=AvgTime/100))+
+#   scale_y_continuous(sec.axis = sec_axis(~./100, name = "Average Simulation Time (minutes)"))+
+#   # ylab("Best Nash-Sutcliffe Value")+
+#   labs(title="Model Performance and Run Time", subtitle="MESH Model, Baker Creek Watershed")+
+#   theme(legend.position="top")
+#  
+# brp
+# lnp
+# 
+# ggarrange(brp, lnp, ncol=1, nrow=2, heights=c(2, 0.7), align="v")
+```
+
+
+### Plot the identifiability for each calibrated parameter for each scenario
+Plot normalized parameter range vs parameter (see notes as well as Herbert's report) for each configuration; be sure to add a straight line for the "acceptable identifiability" cutoff.
+```{r}
+ParamIdent(folder_S1_3, 1, 8) #Resulting OstBest files are called "S1"
+ParamIdent(folder_S2, 2, 6)
+ParamIdent(folder_S3, 3, 6)
+ParamIdent(folder_S1P, "1P", 8)
+ParamIdent(folder_S2P, "2P", 6)
+```
+
+```{r}
+OstBestNorm_S1$Param_Names <- gsub(" ", "", OstBestNorm_S1$Param_Names)
+OstBestNorm_S2$Param_Names <- gsub(" ", "", OstBestNorm_S2$Param_Names)
+OstBestNorm_S3$Param_Names <- gsub(" ", "", OstBestNorm_S3$Param_Names)
+OstBestNorm_S1P$Param_Names <- gsub(" ", "", OstBestNorm_S1P$Param_Names)
+OstBestNorm_S2P$Param_Names <- gsub(" ", "", OstBestNorm_S2P$Param_Names)
+
+# Scenario 1 ----------------------------------------------------------------------------
+IdenS1 <- ggplot(OstBestNorm_S1,aes(x=Param_Names, y=Diff, group=1))+
+  geom_point(stat='summary', fun.y=sum)+
+  stat_summary(fun.y=sum, geom="line")+
+  coord_cartesian(ylim=c(0,1))+
+  scale_y_continuous(breaks=seq(0,1,0.1))+
+  geom_line(mapping=aes(y=0.3), linetype=2)+
+  theme(axis.text.x=element_text(angle=90, size=8, hjust=0.95, vjust=0.2), axis.title.y=element_text(size=10))+
+    labs(y="Parameter Identifiability Range (10th-90th Percentile)", x="Parameter", title="Parameter Identifiability - Scenario 1", subtitle="MESH Model, Baker Creek Watershed")+
+   theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+# Scenario 2 ----------------------------------------------------------------------------
+IdenS2 <- ggplot(OstBestNorm_S2,aes(x=Param_Names, y=Diff, group=1))+
+  geom_point(stat='summary', fun.y=sum)+
+  stat_summary(fun.y=sum, geom="line")+
+  coord_cartesian(ylim=c(0,1))+
+  scale_y_continuous(breaks=seq(0,1,0.1))+
+  geom_line(mapping=aes(y=0.3), linetype=2)+
+  theme(axis.text.x=element_text(angle=90, size=6, hjust=0.95, vjust=0.2), axis.title.y=element_text(size=10))+
+    labs(y="Parameter Identifiability Range (10th-90th Percentile)", x="Parameter", title="Parameter Identifiability - Scenario 2", subtitle="MESH Model, Baker Creek Watershed")+
+   theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+# Scenario 3 ----------------------------------------------------------------------------
+IdenS3 <- ggplot(OstBestNorm_S3,aes(x=Param_Names, y=Diff, group=1))+
+  geom_point(stat='summary', fun.y=sum)+
+  stat_summary(fun.y=sum, geom="line")+
+  coord_cartesian(ylim=c(0,1))+
+  scale_y_continuous(breaks=seq(0,1,0.1))+
+  geom_line(mapping=aes(y=0.3), linetype=2)+
+  theme(axis.text.x=element_text(angle=90, size=6, hjust=0.95, vjust=0.2), axis.title.y=element_text(size=10))+
+    labs(y="Parameter Identifiability Range (10th-90th Percentile)", x="Parameter", title="Parameter Identifiability - Scenario 3", subtitle="MESH Model, Baker Creek Watershed")+
+   theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+# Scenario 1P ----------------------------------------------------------------------------
+IdenS1P <- ggplot(OstBestNorm_S1P,aes(x=Param_Names, y=Diff, group=1))+
+  geom_point(stat='summary', fun.y=sum)+
+  stat_summary(fun.y=sum, geom="line")+
+  coord_cartesian(ylim=c(0,1))+
+  scale_y_continuous(breaks=seq(0,1,0.1))+
+  geom_line(mapping=aes(y=0.3), linetype=2)+
+  theme(axis.text.x=element_text(angle=90, size=6, hjust=0.95, vjust=0.2), axis.title.y=element_text(size=10))+
+    labs(y="Parameter Identifiability Range (10th-90th Percentile)", x="Parameter", title="Parameter Identifiability - Scenario 1-P", subtitle="MESH Model, Baker Creek Watershed")+
+   theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+# Scenario 2P ----------------------------------------------------------------------------
+IdenS2P <- ggplot(OstBestNorm_S2P,aes(x=Param_Names, y=Diff, group=1))+
+  geom_point(stat='summary', fun.y=sum)+
+  stat_summary(fun.y=sum, geom="line")+
+  coord_cartesian(ylim=c(0,1))+
+  scale_y_continuous(breaks=seq(0,1,0.1))+
+  geom_line(mapping=aes(y=0.3), linetype=2)+
+  theme(axis.text.x=element_text(angle=90, size=6, hjust=0.95, vjust=0.2), axis.title.y=element_text(size=10))+
+    labs(y="Parameter Identifiability Range (10th-90th Percentile)", x="Parameter", title="Parameter Identifiability - Scenario 2-P", subtitle="MESH Model, Baker Creek Watershed")+
+   theme(plot.background = element_rect(colour="black", linetype=1, size=1))
+
+# Save plots
+# ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/IdenS1.jpg", plot=IdenS1, width=17.75, height=9, unit="cm")
+# 
+# ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/IdenS2.jpg", plot=IdenS2, width=17.75, height=9, unit="cm")
+# 
+# ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/IdenS3.jpg", plot=IdenS3, width=17.75, height=9, unit="cm")
+# 
+# ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/IdenS1P.jpg", plot=IdenS1P, width=17.75, height=9, unit="cm")
+# 
+# ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/IdenS2P.jpg", plot=IdenS2P, width=17.75, height=9, unit="cm")
+```
+
+```{r}
+
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
