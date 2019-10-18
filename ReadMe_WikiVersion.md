@@ -5,7 +5,7 @@
 ## General information
 
 Basin/Domain name: Baker Creek Watershed
-Location: NWT
+Location: near Yellowknife, NWT
 Steward: Haley Brauner
 Last updated: August, 2019
 
