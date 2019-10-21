@@ -1,5 +1,5 @@
 #Ignore files in the Data/Raw folder
-Data/Raw
+Data/Raw/*
 
 #Ignore all output files
 Model/Scenario*/Output/*
