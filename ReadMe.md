@@ -62,7 +62,7 @@ Also includes "Configuration_Details.md" which describes the differences between
 - This folder contains a copy of the Ostrich program (uncompiled).
 
 ### Scenario_*
-*1 folder for each configuration, with input and output sub-folders*
+*1 folder for each configuration, each with input and output sub-folders*
 
 - Input  
   - *Includes the MESH inputs files, driving data, and scripts for the model configuration*
