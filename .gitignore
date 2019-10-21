@@ -1,0 +1,9 @@
+#Ignore files in the Data/Raw folder
+Data/Raw
+
+#Ignore all output files
+Model/Scenario*/Output
+
+#but don't ignore the push.sh or pull.sh files, or any .md (which are ReadMe) files
+!*.sh
+!*.md
