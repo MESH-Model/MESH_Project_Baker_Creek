@@ -1,3 +1,0 @@
-AttributeName: Specific_humidity_2m
-AttributeUnits: "kg kg**-1"
-Field = min(max(1*Source + 0), -inf), inf)

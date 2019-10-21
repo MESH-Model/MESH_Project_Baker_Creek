@@ -1,3 +1,0 @@
-AttributeName: Incoming_shortwave_down_incident_at_surface
-AttributeUnits: "W m**-2"
-Field = min(max(1*Source + 0), -inf), inf)

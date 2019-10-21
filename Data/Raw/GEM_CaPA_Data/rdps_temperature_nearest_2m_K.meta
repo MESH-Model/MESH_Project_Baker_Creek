@@ -1,3 +1,0 @@
-AttributeName: Air_temperature_at_2m
-AttributeUnits: K
-Field = min(max(1*Source + 273.16), -inf), inf)

@@ -1,3 +1,0 @@
-AttributeName: Total_precipitation_rate_at_surface
-AttributeUnits: "kg m**-2 s**-1"
-Field = min(max(0.0462963*Source + 0), -inf), inf)
