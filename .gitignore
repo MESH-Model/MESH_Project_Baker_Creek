@@ -7,4 +7,4 @@ Model/Scenario*/Output
 #but don't ignore the push.sh or pull.sh files, or any .md (which are ReadMe) files
 !*.sh
 !*.md
-!*.gitkeep
+!.gitkeep
