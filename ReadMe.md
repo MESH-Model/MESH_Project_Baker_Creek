@@ -1,9 +1,9 @@
 # Representation of Spatial Heterogeneity in the MESH Model - Baker Creek, NWT
 
 ## Team
-  **Primary modeller:** Haley Brauner
-  **MESH training and support:** Dan Princz, ECCC
-  **Advisors:** Bruce Davison, ECCC and Andrew Ireson, GIWS
+  **Primary modeller:** Haley Brauner  
+  **MESH training and support:** Dan Princz, ECCC  
+  **Advisors:** Bruce Davison, ECCC and Andrew Ireson, GIWS  
 
 ## Date
 May-August, 2019
