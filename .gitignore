@@ -4,6 +4,9 @@ Data/Raw/*
 #Ignore all model output files
 Model/Scenario*/Output/*
 
+#Ignore the GrahamConnect.sh files (these are just shortcuts for connecting to Graham)
+GrahamConnect.sh
+
 #but don't ignore the push.sh or pull.sh files, or any .md (which are ReadMe) files
 !*.sh
 !*.md

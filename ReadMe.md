@@ -15,7 +15,7 @@ May-August, 2019
   The modelling project for the purpose of the MWS Capstone Project is complete, though more work could be done to the model of the Baker Creek watershed to get better performance results.
 
 ## References
-  See the [Basin Meta-data Page](https://wiki.usask.ca/display/MESH/Basin+Meta-data) and the project report for a list of references.
+  See the [Basin Meta-data Page](https://wiki.usask.ca/display/MESH/Basin+Meta-data) and the project report for a list of references. *Not yet complete*
 ___
 ___
 # Folder Structure
@@ -23,7 +23,7 @@ All folders are tracked by Git except:
 - Data/Raw
 - Model/Scenario*/Outputs
 
-The files in these folders are stored on Graham and can be synced with the local machine via the respective push/pull bash scripts included in the folders Data/Raw and Model folders.
+The files in these folders are stored on Graham and can be synced with the local machine via the respective push/pull bash scripts included in the Data/Raw and Model folders.
 
 ## Code
 - Includes pre- and post-processing scripts used in the project
@@ -51,7 +51,7 @@ The files in these folders are stored on Graham and can be synced with the local
 
 ## Model
 *Includes "MESH Modelling Journal.docx", which is notes kept during the modelling.  
-Also includes "Configuration_Details.md" which describes the differences between the model scenarios.*
+Also includes a "ReadMe.md" file which describes the differences between the model scenarios.*
 
 ### Justification
 - Include an Excel (xlsx) file outlining the parameters and ranges used in the model and rationale for their use (with references listed).
@@ -61,7 +61,7 @@ Also includes "Configuration_Details.md" which describes the differences between
 - Holds the MESH code used for running the mode
   - MESH_Code.r1024 was used for Scenarios 1, 2, and 3 of the modelling project
   - r1552_mod was used for Scenarios 1-P and 2-P
-  - No modifications were made to the code beyond their versions
+  - No modifications were made to the code
 
 ### Ostrich
 - This folder contains a copy of the Ostrich program (uncompiled).
@@ -75,17 +75,11 @@ Also includes "Configuration_Details.md" which describes the differences between
 - Output
   - *Includes the output files for the model configuration / each run*
 
-Justification
-*Includes files related to scenario configuration choice, parameter selection, initial conditions, etc.*
+## Presentations
+*Contains the final powerpoint presenation and the draft project report (final pdf yet to be released)*
 
-Superceded
-*Include previous versions of certain files only if relevant to the project*
-
-Presentations
-*Contains powerpoint (or similar), poster, or other presentations or reports related to the project (formal or otherwise)*
-
-### Site
+## Site
+Includes:
 - Maps
 - PhotosVideos
-- Reports
 - Site Meta-data
