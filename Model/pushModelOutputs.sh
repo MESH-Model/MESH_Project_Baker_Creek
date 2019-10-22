@@ -1,13 +1,14 @@
 # rsync -avirh data.dat andrew@water-ami.usask.ca:~/Desktop/ImaginaryRepo/.
-rsync -avirh Scenario_1/Output/ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/Scenario_1/Output
+nums='1 2 3 1-P 2-P'
 
-rsync -avirh Scenario_2/Output/ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/Scenario_2/Output
+for scenario_num in $nums
+do
+  scenario="Scenario_${scenario_num}"
 
-#~/OneDrive/GitProjects/GitHub/MESH_Project_Baker_Creek/Model/
+#Dry Run
+rsync -avirh --dry-run $scenario/Output/ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/$scenario/Output
 
-#rsync -avirh ./Scenario_3/Output/ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/Scenario_3/Output
+#Regular
+#rsync -avirh --dry-run $scenario/Output/ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/$scenario/Output
 
-#rsync -avirh ./Scenario_2/Output/ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/Scenario_2/Output
-
-#rsync -avirh ./Scenario_1/Output/ ~/OneDrive/GitProjects/GitHub/MESH_Project_Baker_Creek/Model/Test
-#Add a "-n" or "--dry-run: at the end of the flags to make it a dry run
+done
