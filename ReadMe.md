@@ -20,10 +20,10 @@ ___
 ___
 # Folder Structure
 All folders are tracked by Git except:
-- Raw data
-- Model outputs for each scenario
+- Data/Raw
+- Model/Scenario*/Outputs
 
-The files in these folders are stored on Graham and can be synced with the local machine via the respective push/pull bash scripts.
+The files in these folders are stored on Graham and can be synced with the local machine via the respective push/pull bash scripts included in the folders Data/Raw and Model folders.
 
 ## Code
 - Includes pre- and post-processing scripts used in the project
