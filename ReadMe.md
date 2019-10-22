@@ -19,6 +19,11 @@ May-August, 2019
 ___
 ___
 # Folder Structure
+All folders are tracked by Git except:
+- Raw data
+- Model outputs for each scenario
+
+The files in these folders are stored on Graham and can be synced with the local machine via the respective push/pull bash scripts.
 
 ## Code
 - Includes pre- and post-processing scripts used in the project
@@ -31,17 +36,17 @@ ___
 ### Processed
 - Includes processed driving data, spatial data (for use in Green Kenue to generate the r2c file for Scenario 3), and streamflow data used for validation
 
-### Driving
+#### Driving
 - Processed driving data used in the model
   - One set used for Scenario 1
   - One set used for Scenarios 2 and 3
     - Note: this is the same data as Scenario 1, but copied to 6 columns -> one per GRU
 - Scripts used to generate the Scenario 1 file are included in the "Code" folder
 
-### Spatial
+#### Spatial
 - Green Kenue files used to generate the r2c file for Scenario 3
 
-### Validation
+#### Validation
 - Streamflow data, including the full period, calibration period (all other values set as negative), and validation period (all other values set as negative)
 
 ## Model
