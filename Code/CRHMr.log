@@ -1,0 +1,440 @@
+2019-10-22_15:51:16 changeRHtoE dataframe:Vitaldf 
+2019-10-22_15:52:54 changeRHtoE dataframe:Vital 
+2019-10-22_15:56:59 changeRHtoE dataframe:Vital 
+2019-10-23_10:04:02 changeRHtoE dataframe:Vital 
+2019-10-23_10:10:39 changeRHtoE dataframe:Vital 
+2019-10-23_10:28:42 changeRHtoE dataframe:Vital 
+2019-10-23_11:09:56 changeRHtoE dataframe:Vital 
+2019-10-23_11:09:57 changeRHtoE dataframe:Vital 
+2019-10-23_11:19:25 changeRHtoE dataframe:Vital 
+2019-10-23_11:45:45 changeRHtoE dataframe:Vital 
+2019-10-23_11:47:23 changeRHtoE dataframe:Vital 
+2019-10-23_11:48:25 changeRHtoE dataframe:Vital 
+2019-10-23_11:59:03 changeRHtoE dataframe:Vital 
+2019-10-23_12:13:59 changeRHtoE dataframe:Vital 
+2019-10-25_13:08:28 changeRHtoE dataframe:Vital 
+2019-10-28_09:26:37 changeRHtoE dataframe:Vital 
+2019-10-30_09:22:49 changeRHtoE dataframe:Vital 
+2019-10-30_10:52:43 changeRHtoE dataframe:Vital 
+2019-10-30_15:09:39 changeRHtoE dataframe:yknife 
+2019-10-30_15:09:50 changeRHtoE dataframe:yknife 
+2019-10-30_15:12:14 changeRHtoE dataframe:yknife 
+2019-10-30_15:12:26 changeRHtoE dataframe:yknife 
+2019-10-30_15:15:52 changeRHtoE dataframe:yknife 
+2019-10-30_15:16:25 changeRHtoE dataframe:yknife 
+2019-10-30_15:19:17 changeRHtoE dataframe:yknife 
+2019-10-30_15:35:22 changeRHtoE dataframe:yknife 
+2019-10-30_15:37:10 changeRHtoE dataframe:yknife 
+2019-11-01_10:42:34 changeRHtoE dataframe:Vital 
+2019-11-01_10:44:25 changeRHtoE dataframe:Vital 
+2019-11-01_10:47:01 changeRHtoE dataframe:Vital 
+2019-11-01_10:52:59 changeRHtoE dataframe:yknife 
+2019-11-01_11:10:20 changeRHtoE dataframe:yknife 
+2019-11-01_13:05:04 insertMissing Obs:obs 
+2019-11-01_13:05:04 findGaps obs:Q variables:Flow 
+2019-11-01_13:06:12 insertMissing Obs:obs 
+2019-11-01_13:06:12 findGaps obs:Q variables:Flow 
+2019-11-01_13:08:59 insertMissing Obs:obs 
+2019-11-01_13:08:59 findGaps obs:Q variables:Flow 
+2019-11-01_13:10:50 insertMissing Obs:Q 
+2019-11-01_13:10:53 insertMissing Obs:obs 
+2019-11-01_13:11:09 insertMissing Obs:Q 
+2019-11-01_13:11:13 insertMissing Obs:obs 
+2019-11-01_13:11:33 insertMissing Obs:obs 
+2019-11-01_13:11:44 insertMissing Obs:obs 
+2019-11-01_13:11:44 findGaps obs:Q variables:Flow 
+2019-11-01_13:11:54 insertMissing Obs:Q 
+2019-11-01_13:12:17 insertMissing Obs:obs 
+2019-11-01_13:12:17 findGaps obs:Q_full variables:Flow 
+2019-11-04_08:57:35 changeRHtoE dataframe:Vital 
+2019-11-04_09:00:29 changeRHtoE dataframe:yknife 
+2019-11-04_09:39:36 changeRHtoE dataframe:yknife 
+2019-11-04_09:39:54 changeRHtoE dataframe:yknife 
+2019-11-04_09:40:44 changeRHtoE dataframe:yknife 
+2019-11-04_09:55:20 changeRHtoE dataframe:yknife 
+2019-11-04_10:56:04 insertMissing Obs:obs 
+2019-11-04_10:56:28 insertMissing Obs:obs 
+2019-11-04_11:00:27 insertMissing Obs:obs 
+2019-11-04_11:01:05 insertMissing Obs:obs 
+2019-11-04_11:01:06 insertMissing Obs:obs 
+2019-11-04_11:21:37 insertMissing Obs:obs 
+2019-11-04_11:22:01 insertMissing Obs:obs 
+2019-11-04_12:22:31 insertMissing Obs:obs 
+2019-11-04_12:24:57 insertMissing Obs:obs 
+2019-11-04_13:05:46 changeRHtoE dataframe:yknife 
+2019-11-04_13:16:04 insertMissing Obs:obs 
+2019-11-04_16:37:28 insertMissing Obs:obs 
+2019-11-04_16:38:06 insertMissing Obs:obs 
+2019-11-05_13:18:55 changeRHtoE dataframe:Vital 
+2019-11-05_13:20:12 changeRHtoE dataframe:yknife 
+2019-11-05_13:56:26 insertMissing Obs:obs 
+2019-11-05_13:56:26 insertMissing Obs:obs 
+2019-11-05_14:01:22 insertMissing Obs:obs 
+2019-11-05_14:06:44 insertMissing Obs:obs 
+2019-11-05_14:09:53 insertMissing Obs:obs 
+2019-11-05_14:11:29 insertMissing Obs:obs 
+2019-11-05_14:12:30 insertMissing Obs:obs 
+2019-11-05_14:12:56 insertMissing Obs:obs 
+2019-11-05_14:13:49 insertMissing Obs:obs 
+2019-11-05_14:14:05 insertMissing Obs:obs 
+2019-11-05_14:14:05 insertMissing Obs:obs 
+2019-11-05_14:14:15 insertMissing Obs:obs 
+2019-11-05_14:14:29 insertMissing Obs:obs 
+2019-11-05_14:14:50 insertMissing Obs:obs 
+2019-11-05_14:15:06 insertMissing Obs:obs 
+2019-11-05_14:26:56 insertMissing Obs:obs 
+2019-11-05_14:27:12 insertMissing Obs:obs 
+2019-11-05_14:27:13 insertMissing Obs:obs 
+2019-11-05_14:27:23 insertMissing Obs:obs 
+2019-11-05_14:27:39 insertMissing Obs:obs 
+2019-11-05_14:27:59 insertMissing Obs:obs 
+2019-11-05_14:28:14 insertMissing Obs:obs 
+2019-11-06_11:11:25 findDupes obs:AirP_new Dupes found 
+2019-11-06_11:14:16 findDupes obs:AirP_new Dupes found 
+2019-11-06_11:16:05 deDupe dataframe:AirP_new action: delete 
+2019-11-06_11:16:28 deDupe dataframe:AirP_new action: delete 
+2019-11-06_11:16:37 findDupes obs:AirP_new No dDupes found 
+2019-11-06_11:17:04 findDupes obs:AirP_new No dDupes found 
+2019-11-06_11:18:31 insertMissing Obs:obs 
+2019-11-06_11:18:56 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:19:43 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:19:56 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:20:01 deDupe dataframe:PFinal_gaps action: mean 
+2019-11-06_11:21:24 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:21:24 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:21:45 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:22:07 deDupe obs:PFinal_gaps 
+2019-11-06_11:23:24 insertMissing Obs:obs 
+2019-11-06_11:23:26 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:23:26 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:24:04 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:24:13 deDupe obs:PFinal_gaps 
+2019-11-06_11:25:25 insertMissing Obs:obs 
+2019-11-06_11:25:36 insertMissing Obs:obs 
+2019-11-06_11:26:21 insertMissing Obs:obs 
+2019-11-06_11:26:22 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:27:19 insertMissing Obs:obs 
+2019-11-06_11:27:20 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:27:24 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:27:24 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:27:53 insertMissing Obs:obs 
+2019-11-06_11:27:53 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:27:53 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:27:53 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:28:00 insertMissing Obs:obs 
+2019-11-06_11:28:01 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:28:01 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:28:01 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:28:13 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:29:09 insertMissing Obs:obs 
+2019-11-06_11:29:09 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:29:09 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:30:11 insertMissing Obs:obs 
+2019-11-06_11:30:11 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:30:11 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:30:58 insertMissing Obs:obs 
+2019-11-06_11:30:58 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:30:58 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:31:13 insertMissing Obs:obs 
+2019-11-06_11:31:13 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:31:13 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:31:30 insertMissing Obs:obs 
+2019-11-06_11:31:32 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:31:36 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:33:07 deDupe dataframe:PFinal_gaps action: delete 
+2019-11-06_11:38:41 insertMissing Obs:obs 
+2019-11-06_11:38:43 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:38:51 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:40:20 insertMissing Obs:obs 
+2019-11-06_11:40:20 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:40:25 deDupe dataframe:PFinal_gaps action: mean 
+2019-11-06_11:41:41 deDupe dataframe:PFinal_gaps action: mean 
+2019-11-06_11:41:53 deDupe obs:PFinal_gaps 
+2019-11-06_11:42:47 insertMissing Obs:obs 
+2019-11-06_11:42:48 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:42:53 deDupe dataframe:PFinal_gaps action: mean 
+2019-11-06_11:42:57 deDupe obs:PFinal_gaps 
+2019-11-06_11:43:23 insertMissing Obs:obs 
+2019-11-06_11:43:24 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:43:28 deDupe dataframe:PFinal_gaps action: mean 
+2019-11-06_11:43:30 deDupe obs:PFinal_gaps 
+2019-11-06_11:48:08 insertMissing Obs:obs 
+2019-11-06_11:48:08 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:48:13 deDupe dataframe:PFinal_gaps action: mean 
+2019-11-06_11:50:09 deDupe obs:PFinal_gaps 
+2019-11-06_11:50:30 insertMissing Obs:obs 
+2019-11-06_11:50:30 findDupes obs:PFinal_gaps Dupes found 
+2019-11-06_11:50:34 deDupe dataframe:PFinal_gaps action: mean 
+2019-11-06_11:57:37 insertMissing Obs:obs 
+2019-11-06_11:57:38 findDupes obs:KFinal_gaps No dDupes found 
+2019-11-06_11:57:42 deDupe obs:KFinal_gaps 
+2019-11-06_11:58:25 insertMissing Obs:obs 
+2019-11-06_11:58:25 findDupes obs:LFinal_gaps No dDupes found 
+2019-11-06_11:58:25 deDupe obs:LFinal_gaps 
+2019-11-06_12:00:41 insertMissing Obs:obs 
+2019-11-06_12:00:42 findDupes obs:PrecipFinal_gaps Dupes found 
+2019-11-06_12:00:49 deDupe dataframe:PrecipFinal_gaps action: mean 
+2019-11-06_12:06:53 insertMissing Obs:obs 
+2019-11-06_12:07:05 findDupes obs:Precip_gaps Dupes found 
+2019-11-06_12:07:11 deDupe dataframe:Precip_gaps action: mean 
+2019-11-06_12:08:04 insertMissing Obs:obs 
+2019-11-06_12:08:04 findGaps obs:Precip_gaps variables:CapaPrecipRate,VitalPrecipRate,Combined 
+2019-11-06_12:08:18 insertMissing Obs:obs 
+2019-11-06_12:08:18 findGaps obs:Precip_gaps variables:CapaPrecipRate,VitalPrecipRate,Combined 
+2019-11-06_12:08:41 insertMissing Obs:obs 
+2019-11-06_12:08:41 findGaps obs:Precip_gaps variables:CapaPrecipRate,VitalPrecipRate,Combined 
+2019-11-06_12:09:52 insertMissing Obs:obs 
+2019-11-06_12:10:11 findDupes obs:Precip_dups No dDupes found 
+2019-11-06_12:10:38 findDupes obs:Precip_dups Dupes found 
+2019-11-06_12:10:59 deDupe dataframe:Precip_dups action: mean 
+2019-11-06_12:12:12 insertMissing Obs:obs 
+2019-11-06_12:12:15 findDupes obs:Precip_dups Dupes found 
+2019-11-06_12:12:25 deDupe dataframe:Precip_dups action: mean 
+2019-11-06_12:14:08 findDupes obs:Precip_dups No dDupes found 
+2019-11-06_12:14:08 deDupe obs:Precip_dups 
+2019-11-06_12:14:33 findDupes obs:Precip_dups Dupes found 
+2019-11-06_12:14:42 deDupe dataframe:Precip_dups action: mean 
+2019-11-06_12:17:51 insertMissing Obs:obs 
+2019-11-06_12:17:54 findDupes obs:P_dups Dupes found 
+2019-11-06_12:18:03 deDupe dataframe:P_dups action: mean 
+2019-11-06_12:18:40 findDupes obs:P_dups Dupes found 
+2019-11-06_12:18:48 deDupe dataframe:P_dups action: mean 
+2019-11-06_12:21:18 insertMissing Obs:obs 
+2019-11-06_12:21:18 findDupes obs:KinComb_dups No dDupes found 
+2019-11-06_12:21:18 deDupe obs:KinComb_dups 
+2019-11-06_12:22:09 insertMissing Obs:obs 
+2019-11-06_12:22:09 findDupes obs:LinComb_dups No dDupes found 
+2019-11-06_12:22:09 deDupe obs:LinComb_dups 
+2019-11-06_12:23:17 insertMissing Obs:obs 
+2019-11-06_12:23:17 findDupes obs:LinComb_dups No dDupes found 
+2019-11-06_12:23:18 deDupe obs:LinComb_dups 
+2019-11-06_12:24:04 insertMissing Obs:obs 
+2019-11-06_12:24:09 findDupes obs:LinComb_dups No dDupes found 
+2019-11-06_12:24:09 deDupe obs:LinComb_dups 
+2019-11-06_12:31:52 insertMissing Obs:obs 
+2019-11-06_12:31:56 findDupes obs:q_dups No dDupes found 
+2019-11-06_12:31:56 deDupe obs:q_dups 
+2019-11-06_12:34:29 insertMissing Obs:obs 
+2019-11-06_12:34:34 findDupes obs:T_dups Dupes found 
+2019-11-06_12:34:47 deDupe dataframe:T_dups action: mean 
+2019-11-06_12:37:47 insertMissing Obs:obs 
+2019-11-06_12:37:56 findDupes obs:u_dups No dDupes found 
+2019-11-06_12:37:56 deDupe obs:u_dups 
+2019-11-06_14:00:14 insertMissing Obs:obs 
+2019-11-06_14:00:14 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,Temp,CommonDate 
+2019-11-06_14:02:00 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-06_14:02:18 insertMissing Obs:obs 
+2019-11-06_14:02:33 findDupes obs:Old_test Dupes found 
+2019-11-06_14:02:41 findDupes obs:Old_test2 Dupes found 
+2019-11-06_14:03:12 deDupe dataframe:Old_test2 action: mean 
+2019-11-06_14:03:27 deDupe dataframe:Old_test2 action: mean 
+2019-11-06_14:03:52 findDupes obs:Old_test3 No dDupes found 
+2019-11-06_14:04:17 insertMissing Obs:obs 
+2019-11-06_14:04:24 insertMissing Obs:obs 
+2019-11-06_14:04:48 insertMissing Obs:obs 
+2019-11-06_14:04:48 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,Temp,CommonDate 
+2019-11-06_14:04:51 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-06_14:04:55 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-06_14:04:58 insertMissing Obs:obs 
+2019-11-06_14:04:58 findGaps obs:Old_test2 variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:05:02 insertMissing Obs:obs 
+2019-11-06_14:05:02 findGaps obs:Old_test2 variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:05:07 insertMissing Obs:obs 
+2019-11-06_14:05:07 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,Temp,CommonDate 
+2019-11-06_14:05:10 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-06_14:05:19 insertMissing Obs:obs 
+2019-11-06_14:05:19 findGaps obs:Old_test2 variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:05:26 findDupes obs:Old_test2 Dupes found 
+2019-11-06_14:05:45 deDupe dataframe:Old_test2 action: mean 
+2019-11-06_14:05:47 findDupes obs:Old_test3 No dDupes found 
+2019-11-06_14:06:08 insertMissing Obs:obs 
+2019-11-06_14:06:08 findGaps obs:Old_test3 variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:06:48 insertMissing Obs:obs 
+2019-11-06_14:06:48 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:06:51 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-06_14:06:56 insertMissing Obs:obs 
+2019-11-06_14:06:56 findGaps obs:Old_test2 variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:07:46 insertMissing Obs:obs 
+2019-11-06_14:07:46 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:07:49 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-06_14:07:53 insertMissing Obs:obs 
+2019-11-06_14:07:53 findGaps obs:Old_test2 variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:08:33 insertMissing Obs:obs 
+2019-11-06_14:08:33 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-06_14:08:36 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-06_14:08:40 insertMissing Obs:obs 
+2019-11-06_14:08:44 findDupes obs:Old_test2 Dupes found 
+2019-11-06_14:09:02 deDupe dataframe:Old_test2 action: mean 
+2019-11-06_14:09:03 findDupes obs:Old_test3 No dDupes found 
+2019-11-06_14:09:05 insertMissing Obs:obs 
+2019-11-06_14:10:14 insertMissing Obs:obs 
+2019-11-06_14:10:29 findDupes obs:New_test No dDupes found 
+2019-11-07_09:06:16 insertMissing Obs:obs 
+2019-11-07_09:06:16 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,Temp 
+2019-11-07_09:06:18 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,Temp methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-07_09:06:22 insertMissing Obs:obs 
+2019-11-07_09:06:22 findDupes obs:Old_test2 Dupes found 
+2019-11-07_09:06:40 deDupe dataframe:Old_test2 action: mean 
+2019-11-07_09:06:40 findDupes obs:Old_test3 No dDupes found 
+2019-11-07_09:06:40 insertMissing Obs:obs 
+2019-11-07_09:06:42 insertMissing Obs:obs 
+2019-11-07_09:06:42 findDupes obs:New_test No dDupes found 
+2019-11-07_09:15:27 insertMissing Obs:obs 
+2019-11-07_09:15:27 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,T 
+2019-11-07_09:15:29 interpolate dataframe:Old_test Variables:AirP,K,L,q,u,Precip,T methods:linear,linear,linear,linear,linear,linear,linear maxlength:5 
+2019-11-07_09:15:31 insertMissing Obs:obs 
+2019-11-07_09:15:32 findDupes obs:Old_test2 Dupes found 
+2019-11-07_09:15:50 deDupe dataframe:Old_test2 action: mean 
+2019-11-07_09:15:50 findDupes obs:Old_test3 No dDupes found 
+2019-11-07_09:15:51 insertMissing Obs:obs 
+2019-11-07_09:41:07 insertMissing Obs:obs 
+2019-11-07_09:41:07 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,T 
+2019-11-07_09:45:24 findDupes obs:Old_test Dupes found 
+2019-11-07_09:55:11 insertMissing Obs:obs 
+2019-11-07_09:55:11 findGaps obs:q_old variables:Combined 
+2019-11-07_09:55:19 findDupes obs:q_old No dDupes found 
+2019-11-07_10:48:58 findDupes obs:Old_test Dupes found 
+2019-11-07_10:49:07 insertMissing Obs:obs 
+2019-11-07_10:49:15 insertMissing Obs:obs 
+2019-11-07_10:49:15 findGaps obs:Old_test variables:AirP,K,L,q,u,Precip,T 
+2019-11-07_10:51:38 insertMissing Obs:obs 
+2019-11-07_10:51:38 findGaps obs:Old_test variables:AirP,K,L,q,u 
+2019-11-07_10:51:41 findDupes obs:Old_test No dDupes found 
+2019-11-07_10:52:25 findDupes obs:P_old No dDupes found 
+2019-11-07_10:52:31 findDupes obs:T_old Dupes found 
+2019-11-07_10:53:23 insertMissing Obs:obs 
+2019-11-07_10:53:50 findDupes obs:P_old No dDupes found 
+2019-11-07_10:54:45 insertMissing Obs:obs 
+2019-11-07_10:54:45 findGaps obs:q_old variables:Combined 
+2019-11-07_10:54:46 findDupes obs:q_old No dDupes found 
+2019-11-07_10:55:53 insertMissing Obs:obs 
+2019-11-07_10:55:53 findGaps obs:L_old variables:Combined 
+2019-11-07_10:55:54 findDupes obs:L_old No dDupes found 
+2019-11-07_10:56:03 insertMissing Obs:obs 
+2019-11-07_10:56:03 findGaps obs:K_old variables:Combined 
+2019-11-07_10:56:04 findDupes obs:K_old No dDupes found 
+2019-11-07_10:56:36 insertMissing Obs:obs 
+2019-11-07_10:56:36 findGaps obs:T_old variables:Combined 
+2019-11-07_10:56:37 findDupes obs:T_old Dupes found 
+2019-11-07_10:59:03 insertMissing Obs:obs 
+2019-11-07_10:59:03 findGaps obs:u_old variables:Combined 
+2019-11-07_10:59:04 findDupes obs:u_old No dDupes found 
+2019-11-07_11:14:14 insertMissing Obs:obs 
+2019-11-07_11:14:14 findGaps obs:Old variables:q,L,K,AirP,u 
+2019-11-07_11:14:55 interpolate dataframe:Old Variables:q,L,K,AirP,u methods:linear,linear,linear,linear,linear maxlength:5 
+2019-11-07_11:15:11 insertMissing Obs:obs 
+2019-11-07_11:17:18 interpolate dataframe:T_old Variables:T methods:linear maxlength:5 
+2019-11-07_11:17:46 deDupe dataframe:T_old_fixed action: mean 
+2019-11-07_11:51:26 insertMissing Obs:obs 
+2019-11-07_11:51:31 findDupes obs:New No dDupes found 
+2019-11-07_12:16:18 insertMissing Obs:obs 
+2019-11-07_12:16:18 findDupes obs:Precip_dups Dupes found 
+2019-11-07_12:16:26 deDupe dataframe:Precip_dups action: mean 
+2019-11-07_12:18:02 findDupes obs:Capa30min No dDupes found 
+2019-11-07_12:18:38 findDupes obs:Capa30min_check Dupes found 
+2019-11-07_13:29:54 findDupes obs:Capa30min_check Dupes found 
+2019-11-07_13:45:37 changeRHtoE dataframe:Vital 
+2019-11-07_13:58:48 findDupes obs:Capa30min_check No dDupes found 
+2019-11-07_14:01:25 findDupes obs:PrecipComb No dDupes found 
+2019-11-07_14:01:50 insertMissing Obs:obs 
+2019-11-07_14:02:13 deDupe dataframe:Precip_dups action: mean 
+2019-11-07_14:02:15 findDupes obs:PrecipComb No dDupes found 
+2019-11-07_14:02:52 insertMissing Obs:obs 
+2019-11-07_14:02:52 findGaps obs:Precip_gaps variables:CapaPrecipRate,VitalPrecipRate,Combined 
+2019-11-07_14:03:33 findDupes obs:Precip_dups No dDupes found 
+2019-11-07_14:33:32 insertMissing Obs:obs 
+2019-11-07_14:33:56 findDupes obs:Precip_dups No dDupes found 
+2019-11-07_14:34:06 deDupe obs:Precip_dups 
+2019-11-07_14:36:06 insertMissing Obs:obs 
+2019-11-07_14:36:06 findGaps obs:q_old variables:q 
+2019-11-07_14:36:06 findDupes obs:q_old No dDupes found 
+2019-11-07_14:36:41 insertMissing Obs:obs 
+2019-11-07_14:36:41 findDupes obs:New No dDupes found 
+2019-11-07_15:13:17 changeRHtoE dataframe:Vital 
+2019-11-07_15:14:07 changeRHtoE dataframe:yknife 
+2019-11-07_15:14:21 insertMissing Obs:obs 
+2019-11-07_15:14:21 findDupes obs:P_dups Dupes found 
+2019-11-07_15:14:29 deDupe dataframe:P_dups action: mean 
+2019-11-07_15:14:42 insertMissing Obs:obs 
+2019-11-07_15:14:42 findDupes obs:KinComb_dups No dDupes found 
+2019-11-07_15:14:42 deDupe obs:KinComb_dups 
+2019-11-07_15:14:46 insertMissing Obs:obs 
+2019-11-07_15:14:46 findDupes obs:LinComb_dups No dDupes found 
+2019-11-07_15:14:46 deDupe obs:LinComb_dups 
+2019-11-07_15:18:05 findDupes obs:PrecipComb No dDupes found 
+2019-11-07_15:18:06 insertMissing Obs:obs 
+2019-11-07_15:18:06 findDupes obs:Precip_dups Dupes found 
+2019-11-07_15:18:11 deDupe dataframe:Precip_dups action: mean 
+2019-11-07_15:22:48 insertMissing Obs:obs 
+2019-11-07_15:22:48 findDupes obs:Precip_dups Dupes found 
+2019-11-07_15:22:53 deDupe dataframe:Precip_dups action: mean 
+2019-11-07_15:23:17 insertMissing Obs:obs 
+2019-11-07_15:23:26 findDupes obs:Precip_dups Dupes found 
+2019-11-07_15:24:43 findDupes obs:CapaP_check No dDupes found 
+2019-11-07_15:25:07 findDupes obs:VitalP_check Dupes found 
+2019-11-07_15:27:01 findDupes obs:VitalP_check Dupes found 
+2019-11-07_15:27:05 deDupe dataframe:VitalP_check action: mean 
+2019-11-07_15:27:12 findDupes obs:VitalP_check No dDupes found 
+2019-11-07_15:27:17 findDupes obs:VitalP_check No dDupes found 
+2019-11-07_15:27:36 insertMissing Obs:obs 
+2019-11-07_15:27:36 findDupes obs:Precip_dups No dDupes found 
+2019-11-07_15:28:07 findDupes obs:VitalP_check Dupes found 
+2019-11-07_15:28:11 deDupe dataframe:VitalP_check action: mean 
+2019-11-07_15:28:11 findDupes obs:VitalP_check No dDupes found 
+2019-11-07_15:28:12 insertMissing Obs:obs 
+2019-11-07_15:28:12 findDupes obs:Precip_dups No dDupes found 
+2019-11-07_15:28:12 deDupe obs:Precip_dups 
+2019-11-07_15:31:12 findDupes obs:Vital_check No dDupes found 
+2019-11-07_15:31:24 findDupes obs:Vital_check Dupes found 
+2019-11-07_15:34:04 findDupes obs:VitalP_check Dupes found 
+2019-11-07_15:34:09 deDupe dataframe:VitalP_check action: mean 
+2019-11-07_15:34:09 findDupes obs:VitalP_check No dDupes found 
+2019-11-07_15:34:10 insertMissing Obs:obs 
+2019-11-07_15:34:10 findDupes obs:Precip_dups No dDupes found 
+2019-11-07_15:34:10 deDupe obs:Precip_dups 
+2019-11-07_15:35:26 insertMissing Obs:obs 
+2019-11-07_15:35:26 findDupes obs:q_dups No dDupes found 
+2019-11-07_15:35:26 deDupe obs:q_dups 
+2019-11-07_15:36:15 insertMissing Obs:obs 
+2019-11-07_15:36:15 findDupes obs:T_dups Dupes found 
+2019-11-07_15:36:29 deDupe dataframe:T_dups action: mean 
+2019-11-07_15:37:24 insertMissing Obs:obs 
+2019-11-07_15:37:24 findDupes obs:u_dups No dDupes found 
+2019-11-07_15:37:24 deDupe obs:u_dups 
+2019-11-07_15:38:03 changeRHtoE dataframe:Vital 
+2019-11-07_15:38:52 changeRHtoE dataframe:yknife 
+2019-11-07_15:39:07 insertMissing Obs:obs 
+2019-11-07_15:39:07 findDupes obs:P_dups Dupes found 
+2019-11-07_15:39:13 deDupe dataframe:P_dups action: mean 
+2019-11-07_15:39:24 insertMissing Obs:obs 
+2019-11-07_15:39:24 findDupes obs:KinComb_dups No dDupes found 
+2019-11-07_15:39:24 deDupe obs:KinComb_dups 
+2019-11-07_15:39:29 insertMissing Obs:obs 
+2019-11-07_15:39:29 findDupes obs:LinComb_dups No dDupes found 
+2019-11-07_15:39:29 deDupe obs:LinComb_dups 
+2019-11-07_15:41:01 changeRHtoE dataframe:Vital 
+2019-11-07_15:41:51 changeRHtoE dataframe:yknife 
+2019-11-07_15:42:05 insertMissing Obs:obs 
+2019-11-07_15:42:05 findDupes obs:P_dups Dupes found 
+2019-11-07_15:42:12 deDupe dataframe:P_dups action: mean 
+2019-11-07_15:42:23 insertMissing Obs:obs 
+2019-11-07_15:42:23 findDupes obs:KinComb_dups No dDupes found 
+2019-11-07_15:42:23 deDupe obs:KinComb_dups 
+2019-11-07_15:42:27 insertMissing Obs:obs 
+2019-11-07_15:42:27 findDupes obs:LinComb_dups No dDupes found 
+2019-11-07_15:42:27 deDupe obs:LinComb_dups 
+2019-11-07_15:42:36 findDupes obs:VitalP_check Dupes found 
+2019-11-07_15:42:39 deDupe dataframe:VitalP_check action: mean 
+2019-11-07_15:42:39 findDupes obs:VitalP_check No dDupes found 
+2019-11-07_15:42:40 insertMissing Obs:obs 
+2019-11-07_15:42:40 findDupes obs:Precip_dups No dDupes found 
+2019-11-07_15:42:40 deDupe obs:Precip_dups 
+2019-11-07_15:42:55 insertMissing Obs:obs 
+2019-11-07_15:42:55 findDupes obs:q_dups No dDupes found 
+2019-11-07_15:42:55 deDupe obs:q_dups 
+2019-11-07_15:43:15 insertMissing Obs:obs 
+2019-11-07_15:43:15 findDupes obs:T_dups Dupes found 
+2019-11-07_15:43:27 deDupe dataframe:T_dups action: mean 
+2019-11-07_15:43:39 insertMissing Obs:obs 
+2019-11-07_15:43:39 findDupes obs:u_dups No dDupes found 
+2019-11-07_15:43:39 deDupe obs:u_dups 

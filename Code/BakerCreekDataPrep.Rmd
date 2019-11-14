@@ -1,0 +1,802 @@
+---
+title: Baker Creek Watershed MESH Model - Data Preparation
+output: html_notebook
+self_contained: no
+---
+# List of updates to be made 
+- Replace the "Load the data" section to download the streamflow data directly from Hydat, rather than from a file that has been downloaded manually
+
+#Introduction
+This code performs all the data preparation used in the MESH Baker Creek model. 
+
+The file folder structure is based on the MESH_Project_Baker_Creek repository stored here: https://github.com/MESH-Model/MESH_Project_Baker_Creek. However, the first section allows for setting the directories for the storage of each dataset.
+
+# Load libraries
+```{r include=FALSE}
+library(tidyverse)
+#library(dplyr)
+library(lubridate)
+library(devtools)
+library(CRHMr)
+library(zoo)
+library(humidity)
+library(weathercan)
+library(tidyhydat)
+
+#library(ggpubr)
+```
+
+#Set the directories
+```{r}
+ESSD_met="../Data/Raw/ESSD_Baker_Creek_Data/HydrometeorologicalData"
+GEMCaPAFolder="../Data/Raw/GEM_CaPA_Data"
+
+#Full column names for consistent data format:
+full_colnames <- read_csv("met_variable_names.csv")
+full_colnames <- colnames(full_colnames)
+
+```
+
+# Put the data from various sources in the same format
+*Formerly the script "Prepar_Driving_Data.R"*
+
+For each data source:
+- Perform unit conversion to get the units to Pa, W/m2
+- Ensure the timezone is MST
+- Calculate specific humidity
+
+
+## Vital Tower
+Prep the Vital data frame
+```{r}
+colnames_vital=c('Year', 'DateTime', 'AirP', 'Kin', 'Kout', 'Lin', 'Lout', 'Qstar', 'T_4.4m', 'RH_4.4m', 'T_2m', 'RH_2m', 'u_4.4m', 'Rain_mm', 'Qe', 'Qh')
+
+Vital_load <- read_csv(file=paste0(ESSD_met,"/vital tower half hourly time series v1.csv"), col_names = colnames_vital, skip=1)
+    #Units are: kPa, W/m2, degC, %, m/s, and mm; timezone is MST
+
+#Change Vital_load to a CRHMr data frame (i.e. first column called "datetime" in Posixct)
+Vital <- Vital_load
+Vital <- select(Vital, -1)
+Vital$DateTime <- dmy_hm(Vital$DateTime, tz="MST")
+Vital <- as.data.frame(Vital)
+Vital <- rename(Vital, datetime=DateTime, T.2=T_2m, T.1=T_4.4m, RH.2=RH_2m, RH.1=RH_4.4m)
+  #1 is at 4.4m, #2 is at 2m
+class(Vital$datetime)
+
+#Replace all "9999" values with "NA"
+Vital[Vital==9999]<- NA
+Vital[Vital==99999]<- NA
+```
+
+### Specific humidity calculation
+```{r}
+#Convert RH to ea using the CRHMr package
+Vital <- changeRHtoEa(Vital, quiet=FALSE)
+  # Note: ea results are in kPa
+
+# Convert ea to q using the humidity package
+Vital <- mutate(Vital, q.1=SH(ea.1, AirP), q.2=SH(ea.2, AirP))
+```
+
+#### Check the RH to ea calculation
+This section calculates the comparison  between methods for calculating ea and q (this is not crucial to the data-prep process, but give some justification for the method chosen.)
+```{r}
+# # Using the CRHMr function "changeRHtoEa"
+# Vital_ea_C <- changeRHtoEa(Vital, quiet=FALSE)
+# Vital_ea_C <- filter(Vital_ea_C, datetime %in% c(as.POSIXct("2006-07-15 14:00:00", tz="MST"), as.POSIXct("2007-04-23 00:00:00", tz="MST")))
+# 
+# # Using Dingman equaitons 3.9a, 3.9b, 3.11 (matches CRHMr calculation almost exactly)
+# Vital_ea_D <- Vital
+# Vital_ea_D <- Vital_ea_D %>%
+#   filter(datetime %in% c(as.POSIXct("2006-07-15 14:00:00", tz="MST"), as.POSIXct("2007-04-23 00:00:00", tz="MST")))%>%
+#  mutate(ea.1=ifelse(T.1>=0,RH.1/100*0.611*exp(17.27*T.1/(T.1+237.3)),RH.1/100*0.611*exp(21.87*T.1/(T.1+265.5))))%>%
+#  mutate(ea.2=ifelse(T.2>=0,RH.2/100*0.611*exp(17.27*T.2/(T.2+237.3)),RH.2/100*0.611*exp(21.87*T.2/(T.2+265.5))))
+# 
+# #Using the formula on the Wiki (doesn't match the CRHMr calculation)
+# Vital_ea_W <- Vital
+# Vital_ea_W <- Vital_ea_W %>%
+#   filter(datetime %in% c(as.POSIXct("2006-07-15 14:00:00", tz="MST"), as.POSIXct("2007-04-23 00:00:00", tz="MST")))%>%
+#    mutate(ea.1=RH.1/100*10^((0.7859+0.03477*T.1)/(1.0+0.00412*T.1)+2)/1000)%>%
+#    mutate(ea.2=RH.2/100*10^((0.7859+0.03477*T.2)/(1.0+0.00412*T.2)+2)/1000)
+#   
+# # Using the humidity package
+# Vital_ea_hum <- Vital
+# Vital_ea_hum <- Vital_ea_hum %>%
+#     filter(datetime %in% c(as.POSIXct("2006-07-15 14:00:00", tz="MST"), as.POSIXct("2007-04-23 00:00:00", tz="MST"))) %>%
+#   mutate(es.1=SVP(C2K(T.1)), es.2=SVP(C2K(T.2))) %>%
+#   mutate(ea.1=WVP2(RH.1, es.1)/1000, ea.2=WVP2(RH.2, es.2)/1000)
+
+```
+CONCLUSION: The calculaiton of ea from T and RH differs from the Wiki to the humidity package to CRHMr/Dingman (note: CRHMr and Dingman get the same answer for both >0oC and <0oC). In general, the Wiki calc is slightly larger for >0oC and larger for <0oC, whereas the humidity package is larger for both above and below 0oC. Since we are working in a cold climate, use the CRHMr package.
+
+#### Check the ea to q calculation
+```{r}
+# # Use the ea calculation from the CRHMr package (Vital_ea_C)
+# 
+# # Using the humidity package:
+# qcheck_hum <- Vital_ea_C
+# qcheck_hum <- qcheck_hum %>%
+#   filter(datetime %in% c(as.POSIXct("2006-07-15 14:00:00", tz="MST"), as.POSIXct("2007-04-23 00:00:00", tz="MST")))%>%
+#   mutate(q.1=SH(ea.1, AirP), q.2=SH(ea.2, AirP))
+# 
+# # Using the Dingman Calculation
+# 
+# qcheck_D <- filter(Vital_ea_C, datetime %in% c(as.POSIXct("2006-07-15 14:00:00", tz="MST"), as.POSIXct("2007-04-23 00:00:00", tz="MST")))
+# qcheck_D <- qcheck_D %>%
+#   mutate(q.1=0.622*ea.1/AirP, q.2=0.622*ea.2/AirP)
+# 
+# # Using the Wiki Calculation
+# 
+# qcheck_W <- Vital_ea_C
+# qcheck_W <- qcheck_W %>%
+#   select(-q.1, -q.2)%>%
+#   filter(datetime %in% c(as.POSIXct("2006-07-15 14:00:00", tz="MST"), as.POSIXct("2007-04-23 00:00:00", tz="MST")))%>%
+#   mutate(q.1=0.622*ea.1/(AirP-0.378*ea.1), q.2=0.622*ea.2/(AirP-0.378*ea.2))
+```
+CONCLUSION: All the methods, when using the same ea and AirP input, give the same q result. Therefore going forward, will use the humidity package funciton "SH"
+
+### Put the data into the standard format
+```{r}
+# Convert air pressure to Pa and put in a new column called "AirP_Pa"
+Vital <- mutate(Vital, AirP_Pa=AirP*1000)
+
+# Rename columns to match the standard format
+Vital <- rename(Vital, T_4.4m=T.1, T_2m=T.2, q_4.4m=q.1, q_2m=q.2, DateTime=datetime)
+
+#Remove unneeded columns (AirP, ea)
+Vital <-  select(Vital, -c(AirP,ea.1, ea.2))
+
+#Add missing columns and re-order columns
+
+Vital_cols <- colnames(Vital)
+missing_colnames <- setdiff(full_colnames,Vital_cols)
+Vital[,missing_colnames] <- NA
+Vital$Station <- "Vital"
+Vital <- Vital[, full_colnames]
+
+save(Vital, file="Vital.Rda", version=2)
+
+#qplot(data=Vital,x=DateTime, y=T_4.4m, geom='point')
+#qplot(data=Vital,x=DateTime, y=AirP_Pa, geom='point')
+```
+
+## Landing Tower
+
+Prep the Landing data frame
+```{r}
+colnames_landing=c('DateTime', 'u_1.1m', 'u_dir', 'T_1.1m', 'ea_1.1m', 'Qstar', 'Kin', 'Kout', 'Twater', 'Qe', 'Qh')
+
+Landing_load <- read_csv(file=paste0(ESSD_met,"/landing tower half hourly time series v1.csv"),col_names=colnames_landing, skip=1)
+    #Units are: kPa, W/m2, degC, %, m/s, and mm; Actual meas. height of T and e is 1.4 m; labelled as 1.1m for simplification with other datasets
+
+Landing <- Landing_load
+Landing$DateTime <- dmy_hm(Landing$DateTime, tz="MST")
+Landing <- as.data.frame(Landing)
+#Landing <- rename(Landing, datetime=DateTime, T.2=T_2m, T.1=T_4.4m, RH.2=RH_2m, RH.1=RH_4.4m)
+  #1 is at 4.4m, #2 is at 2m
+class(Landing$DateTime)
+
+#Replace all "9999" values with "NA"
+Landing[Landing==9999]<- NA
+
+```
+
+### Specific humidity calculation
+- Since no air pressure measurement for the Landing Tower, use the air pressure measurement from Vital station
+```{r}
+Vital_AirP <- tibble(DateTime=Vital$DateTime, Vital_AirP_Pa=Vital$AirP_Pa)
+Vital_AirP <- as.data.frame(Vital_AirP)
+Landing <- merge(x=Landing,y=Vital_AirP, by="DateTime", all=TRUE)
+
+# Convert ea to q using the humidity package
+Landing <- mutate(Landing, q_1.1m=SH(ea_1.1m, Vital_AirP_Pa))
+
+```
+
+### Put the data into the standard format
+```{r}
+#Remove unneeded columns (used for intermediate calculation)
+Landing <- Landing %>% select(-c(u_dir,Twater,Vital_AirP_Pa, ea_1.1m))
+
+#Add missing columns and re-order columns
+Landing_cols <- colnames(Landing)
+missing_colnames <- setdiff(full_colnames,Landing_cols)
+Landing[,missing_colnames] <- NA
+Landing$Station <- "Landing"
+Landing <- Landing[, full_colnames]
+
+#Remove rows that are all NA
+#Landing <- Landing[rowSums(is.na(Landing))!= ncol(Landing)-2,]
+    # Note: didn't do this for Vital either (for now)
+
+save(Landing, file="Landing.Rda", version=2)
+```
+
+## GEM Data
+Load the data files and combine into 1 
+*Note: GEMLanding and GEMVital are the same values (same GEM grid); Therefore, dropped the GEMLanding data*
+```{r}
+GEMFiles <- list.files(path=GEMCaPAFolder, pattern=glob2rx("rdps*.csv"))
+GEMFiles
+
+file_names <- c("Lin", "AirP_Pa", "Kin", "q_2m", "q_40m", "T_2m_degC","T_2m_degK","T_40m_degC", "T_40m_degK", "u_10m", "u_40m")
+    #Units: W/m2, Pa, kg/kg, degrees C, degrees K, m/s; no need to do conversions
+
+setwd(GEMCaPAFolder)
+i=1
+colNames_GEM=c("DateTime", "GEMYellowknifeA", "GEMLanding", "GEMVital")
+for(x in GEMFiles) {
+  assign(file_names[i],as.data.frame(read_csv(x,skip=3,col_names=colNames_GEM)))  #Read the file and assign name
+  i=i+1
+}
+```
+
+### Convert the hourly GEM data to half-hourly
+```{r}
+#Change the hourly GEM timeseries to halfhourly using the user-defined function "oneToHalfHr"
+      # If you want to assign values to the half hour by interpolating, pass interpolate=1,otherwise interpolate=0 will assign the hour value to the following half hour
+
+      #This block of code was for testing purposes
+      #Lin_test <- Lin
+      #Lin_test <- filter(Lin_test, DateTime <= "2005-05-18 17:00:00")
+          ### Note: this is returning the last value at 2005-05-18 23:00:00, which is UTC+6
+
+oneToHalfHr <- function(myData, interpolate=1) {
+    p <- hms::as_hms(60*30) #30 minutes
+  HalfHourly <- myData
+  if (interpolate == 1) {
+    HalfHourly[,1] <- HalfHourly[,1] - p
+    for (i in 2:ncol(myData)){
+      HalfHourly[,i] <- rollmean(myData[,i], 2, align="right", fill=NA)
+    }
+    HalfHourly <- HalfHourly[-1,]
+  } else {
+    HalfHourly[,1] <- HalfHourly[,1] + p
+  }
+  myData <- rbind(myData, HalfHourly)
+  myData <- arrange(myData,DateTime)
+}
+
+#rm(T_2m_degK, T_40m_degK)
+
+i=1
+for (x in file_names) {
+  assign(paste0(file_names[i],"30min"),oneToHalfHr(eval(parse(text=file_names[i])),1))
+  i=i+1
+}
+#The above loop does the same as below for all variables
+#Lin30min <- oneToHalfHr(Lin,1)
+
+#Test if the average is preserved
+ChkAvgPreserve <- function(variable1, variable2){
+  ColNames <- colnames(variable1)
+  Avg_check <- summarise_each(variable1, fun=mean, ColNames[-1])
+  Avg_check[2,] <- summarise_each(variable2, fun=mean, ColNames[-1])
+  Avg_check[3,] <- summarise_each(Avg_check, fun=diff, ColNames[-1])
+  Avg_check$DataMean <- c("Original", "30 min", "Difference")
+  assign(paste0("AvgPreserve_", deparse(substitute(variable1))), Avg_check, envir=.GlobalEnv)
+}
+
+ChkAvgPreserve(u_10m, u_10m30min)
+
+```
+
+### Combine all GEM data into one data frame
+*Note: Only preserving temperature values in degC -> will convert all temps. after
+```{r}
+#Gather and combine all the datasets; couldn't figure out how to do this in a loop
+
+#First, create the Dataset
+Lin30min <- Lin30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='Lin')
+GEM_data <- Lin30min
+
+      #Then gather each value and add to the combined dataset, GEM_data
+AirP_Pa30min <- AirP_Pa30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='AirP_Pa')
+GEM_data <- merge(x=GEM_data, y=AirP_Pa30min, by=c("DateTime","Station"), all=TRUE)
+
+Kin30min <- Kin30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='Kin')
+GEM_data <- merge(x=GEM_data, y=Kin30min, by=c("DateTime","Station"), all=TRUE)
+
+q_2m30min <- q_2m30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='q_2m')
+GEM_data <- merge(x=GEM_data, y=q_2m30min, by=c("DateTime","Station"), all=TRUE)
+
+q_40m30min <- q_40m30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='q_40m')
+GEM_data <- merge(x=GEM_data, y=q_40m30min, by=c("DateTime","Station"), all=TRUE)
+
+T_2m_degC30min <- T_2m_degC30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='T_2m_degC')
+GEM_data <- merge(x=GEM_data, y=T_2m_degC30min, by=c("DateTime","Station"), all=TRUE)
+
+T_40m_degC30min <- T_40m_degC30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='T_40m_degC')
+GEM_data <- merge(x=GEM_data, y=T_40m_degC30min, by=c("DateTime","Station"), all=TRUE)
+
+u_10m30min <- u_10m30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='u_10m')
+GEM_data <- merge(x=GEM_data, y=u_10m30min, by=c("DateTime","Station"), all=TRUE)
+
+u_40m30min <- u_40m30min %>%
+  select(-GEMLanding)%>%
+  gather('GEMYellowknifeA', 'GEMVital', key="Station", value='u_40m')
+GEM_data <- merge(x=GEM_data, y=u_40m30min, by=c("DateTime","Station"), all=TRUE)
+
+#Not including T_2m_degK or T_40m_degK -> will convert all temps to K later 
+```
+
+### Convert timezone from UTC to MST
+```{r}
+#Convert the GEM data to Local time in Yellowknife (MST)
+attr(GEM_data$DateTime, "tzone") <- "MST"
+```
+
+### Put the data into the standard format 
+```{r}
+#Rename Temp Columns
+GEM_data <- rename(GEM_data, T_40m=T_40m_degC, T_2m=T_2m_degC)
+
+#Add missing columns and rearrange to match other datasets
+GEM_cols <- colnames(GEM_data)
+missing_colnames <- setdiff(full_colnames,GEM_cols)
+GEM_data[,missing_colnames] <- NA
+
+GEM_data <- GEM_data[, full_colnames]
+
+save(GEM_data, file="GEM_data.Rda", version=2)
+```
+
+## CaPA Data
+```{r}
+# Load the data
+colNames_CAPA=c("DateTime", "CAPAYellowknifeA", "CAPALanding", "CAPAVital")
+CAPA_load <- read_csv(paste0(GEMCaPAFolder,"/rdpa_rain_nearest_20020101_20190101.csv"),skip=3,col_names=colNames_CAPA) 
+```
+
+### Change the timezone and filter CaPA to exclue pre-2004 data 
+```{r}
+Capa <- as.data.frame(CAPA_load)
+attr(Capa$DateTime, "tzone") <- "MST" # Shifts the timezone from UTC to MST
+
+Capa <- filter(Capa, year(DateTime)>=2004)
+
+```
+
+### Change the CAPA 6 hr timeseries into 1/2 hour timeseries and backfill the values of precip rate
+#### Test out the CRHMr function "distributeP"
+```{r eval=FALSE}
+#view(Capa)
+CapaTest <- Capa %>%
+  rename(datetime=DateTime)%>%
+  select(datetime, CAPAVital)%>%
+  mutate(P_tot=CAPAVital*60*60*6)%>%
+  select(-CAPAVital)
+class(CapaTest$datetime)
+
+CapaDistP <- distributeP(CapaTest, p.cols=1, timestep=0.5)
+CapaDistP[1,1]
+
+#Compare the monthly totals (remove the "month" row and month from group_by for annual totals)
+CapaTotal <- Capa %>%
+  select(DateTime, CAPAVital)%>%
+  mutate(P_acc=CAPAVital*60*60*6)%>%
+  mutate(year=year(DateTime))%>%
+  mutate(month=month(DateTime))%>%
+  group_by(year, month)%>%
+  summarise(P=sum(P_acc))
+
+CapaDistTotal <- CapaDistP %>%
+  mutate(year=year(datetime))%>%
+  mutate(month=month(datetime))%>%
+  group_by(year, month)%>%
+  summarise(DistP=sum(P_tot))%>%
+  filter(year>2003)
+
+CapaTotal$DistP <- CapaDistTotal$DistP
+CapaTotal <- mutate(CapaTotal, Diff=DistP-P)
+
+
+# Compare CapaDistP with the Capa30min I generated
+CapaCompare <- CapaDistP %>%
+  rename(DateTime=datetime)
+
+Capa30min2 <- filter(Capa30min, Station=="CAPAVital")
+
+CapaCompare <- merge(x=CapaCompare, y=Capa30min2, by="DateTime", all=TRUE)
+
+CapaCompare2 <- CapaCompare %>%
+  rename(DistP=P_tot, VitalOrig=Precip_rate)%>%
+  mutate(VitalOrig=VitalOrig*60*30)%>%
+  select(-Station)%>%
+  gather(DistP, VitalOrig, key="Station", value="Amount")%>%
+  mutate(Date=date(DateTime))%>%
+  group_by(Date, Station)%>%
+  summarise(DailySum=sum(Amount))
+
+CapaCompare2$CommonDate <- as.Date(paste0("2001-", format(CapaCompare2$Date, "%j")),"%Y-%j")
+
+PrecipCompare0511 <- filter(CapaCompare2, year(Date) %in% 2005:2011)
+ggplot() +
+  geom_line(data=PrecipCompare0511, mapping=aes(x=CommonDate, y=DailySum, color=Station), size=0.5) +
+  facet_grid(year(PrecipCompare0511$Date) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Precip - 2005-2011 (check)")
+
+PrecipCompare1218 <- filter(CapaCompare2, year(Date) %in% 2012:2018)
+ggplot() +
+  geom_line(data=PrecipCompare1218, mapping=aes(x=CommonDate, y=DailySum, color=Station), size=0.5) +
+  facet_grid(year(PrecipCompare1218$Date) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Precip - 2012-2018 (check)")
+
+AnnualSums <- CapaCompare %>%
+  rename(DistP=P_tot, VitalOrig=Precip_rate)%>%
+  mutate(VitalOrig=VitalOrig*60*30)%>%
+  select(-Station)%>%
+  gather(DistP, VitalOrig, key="Station", value="Amount")%>%
+  mutate(year=year(DateTime))%>%
+  group_by(year, Station)%>%
+  summarise(AnnualSum=sum(Amount))
+
+```
+
+```{r}
+load("./Capa30min.Rda")
+
+# This function takes a long time to run (may 10 ish minutes?) but it works. Need to find a quicker solution.
+# Maybe this?? https://gist.github.com/dsparks/3706541
+
+  #Obtain the start time as 11x 30 min timesteps prior to the first observation
+# startCapa30min <- as.POSIXlt(Capa$DateTime[1]) # Obtain the start time of the dataset
+# startCapa30min$min <- startCapa30min$min-(30*11) #Adjust the start time of the 30 min dataset to be 5.5 hours earlier(11x 30min timesteps)
+# startCapa30min
+# 
+# Capa[nrow(Capa),1]
+# Capa30min[nrow(Capa30min),1]
+# 
+# 
+#   #Initialzie the DateTime column with the 30 min timesteps desired
+# Capa30min <- seq(as.POSIXct(startCapa30min, tz="MST"), Capa$DateTime[nrow(Capa)], by=(60*30)) # by is seconds
+# Capa30min <- as.data.frame(Capa30min)
+# Capa30min <- rename(Capa30min, DateTime=Capa30min)
+# 
+# # Capa30min_check <- Capa30min %>%
+# #   rename(datetime=DateTime)
+# # 
+# # findDupes(Capa30min_check)
+# 
+# Capa30min$CAPAYellowknifeA <- NA
+# Capa30min$CAPALanding <- NA
+# Capa30min$CAPAVital <- NA
+# 
+#   #Apply the rainfall rate from the Capa data to 12 timesteps in the 30min dataframe
+# Capa30minRow=1
+# CapaRow=1
+# numit=nrow(Capa30min)/12
+# for (i in 1:numit){
+#   for (j in 1:12){
+#     Capa30min[Capa30minRow,2] <- Capa[CapaRow,2]
+#     Capa30min[Capa30minRow,3] <- Capa[CapaRow,3]
+#     Capa30min[Capa30minRow,4] <- Capa[CapaRow,4]
+#     Capa30minRow=Capa30minRow+1
+#   }
+#   CapaRow=CapaRow+1
+# }
+# 
+# Capa30min_made <- Capa30min
+# 
+# findDupes(Capa30min)
+# 
+# Capa30min <- gather (Capa30min, 'CAPAYellowknifeA', 'CAPALanding', 'CAPAVital', key="Station", value='Precip_rate')
+# 
+save(Capa30min, file='Capa30min.Rda', version=2)
+
+head(Capa30min)
+summary(Capa30min)
+glimpse(Capa30min)
+```
+
+## Yellowknife Data
+Measurement heights for Yellowknife data assumed to be 2 m for all measurements except wind, which is 10 m
+```{r}
+# If data is already loaded and saved
+load("./yknife_hr.Rda")
+
+# # If data needs to be downloaded and processed
+# stations_search("Yellowknife", interval=c("hour", "day"))
+# 
+# y1706_hr <- weather_dl(station_id = 1706,start="2004-01-01", end="2019-01-01", interval="hour", time_disp="UTC")
+# y51058_hr <- weather_dl(station_id = 51058 ,start="2004-01-01", end="2019-01-01", interval="hour", time_disp="UTC")
+# 
+# #Combine the hourly data from the different station numbers into one
+# yknife_all_hr <- rbind(y1706_hr,y51058_hr)
+# 
+# #Change the yellowknife data to a data frame
+# yknife_all_hr <- as.data.frame(yknife_all_hr)
+# 
+# yknife_all_hr$time[1]
+# 
+# #Change the timezeon to MST from UTC (downloaded in UTC explicitly)
+# attr(yknife_all_hr$time, "tzone") <- "MST"
+# 
+# 
+# #Save the data
+# save(yknife_all_hr,file="yknife_hr.Rda", version=2)
+
+```
+
+### Calculations / Converstions
+```{r}
+#Rename and select relevant columns (note: column names temporary for use with CRHMr)
+
+yknife <- yknife_all_hr %>%
+  rename(datetime=time, AirP=pressure, rh.1=rel_hum, t.1=temp, u_10m=wind_spd) %>%
+  select(datetime, t.1, u_10m, AirP, rh.1)
+
+#Convert RH to ea using the CRHMr package
+yknife <-  changeRHtoEa(yknife, quiet=FALSE)
+  # Note: ea results are in kPa
+
+# Convert ea to q using the humidity package
+yknife <- mutate(yknife, q.1=SH(ea.1, AirP))
+
+# Convert AirP to Pa from kPa, and convert wind from km/h to m/s, rename columns
+
+yknife <- yknife %>%
+  mutate(AirP_Pa = AirP*1000, u_10m=u_10m/3.6)%>%
+  rename(DateTime=datetime, T_2m=t.1, q_2m=q.1)%>%
+  select(-ea.1, -AirP)
+
+#Convert Yellowknife Data to Half Hourly using interpolation between the hourly points
+# Use the "OnetoHalfHr" function defined above
+yknife_30min <- oneToHalfHr(yknife, 1)
+
+class(yknife_30min[2,1])
+yknife_30min[1,1]
+
+Yknife <- yknife_30min
+Yknife$Station <- "YellowknifeA"
+
+```
+
+### Put the data into the standard format
+```{r}
+Yknife_cols <- colnames(Yknife)
+missing_colnames <- setdiff(full_colnames,Yknife_cols)
+Yknife[,missing_colnames] <- NA
+
+Yknife <- Yknife[, full_colnames]
+
+# Save the tidied Yellowknife Data
+save(Yknife,file="Yknife_HalfHr.Rda", version=2)
+
+```
+
+# Prepare Streamflow Data for the MESH Model
+Streamflow data was obtained from the Water Survey of Canada website for station 07SB013 Baker Creek at the Outlet of Lower Martin Lake [WSC - 07SB013](https://wateroffice.ec.gc.ca/search/historical_results_e.html?search_type=station_number&station_number=07sb013&start_year=1850&end_year=2019&minimum_years=&gross_drainage_operator=%3E&gross_drainage_area=&effective_drainage_operator=%3E&effective_drainage_area=)
+
+This station includes both discharge (param=1) and water level (param=2) data for the years 1983-2016, so it was filtered for discharge data only from 2015 onward.
+
+## Loading in the data
+
+```{r eval=FALSE}
+# # Download the HYDAT database (if not already done so; takes about 10 mins)
+# 
+# hy_dir() # Returns the location of the Hydat database directory
+# download_hydat() # Downloads the hydat database; have to type a response (yes or no) and won't download again if you have the most recent version
+# 
+# Qload <- hy_daily_flows("07SB013", start_date="2005-01-01", end_date="2019-12-31")
+# Qload <- as.data.frame(Qload)
+# head(Qload)
+# summary(Qload)
+```
+
+## Using CRHMr to explore the missing values in the data
+```{r eval=FALSE}
+# Q <- Qload
+# Q <- Q %>%
+#   select(-Parameter, -STATION_NUMBER, -Symbol)%>%
+#   rename(datetime=Date, Flow=Value)
+# 
+# # Add a time (used noon) for the daily flow values for use with POSIXct format
+# hour(Q$datetime) <- 12
+# Q$datetime <- force_tz(Q$datetime, tz="MST")
+# Q$datetime[1]
+# 
+# Q$datetime <- as.POSIXct(Q$datetime)
+# Q <- rename(Q, datetime=datetime)
+# class(Q$datetime)
+# 
+# # Find and explore gaps in the data
+# findGaps(Q, minlength=1, quiet=FALSE) #Stores the gap details in a file called "Qgaps.csv")
+# Qna <- filter(Q, is.na(Flow)==TRUE)
+#     # Any existing gaps were already "NA" values
+# 
+# # Replace NA valuses with -9999
+# Qfull <- Q
+# Qfull$Flow[is.na(Qfull$Flow)==TRUE] <- -9999
+# summary(Qfull)
+# 
+# # Change the format and name of datetime back to "Date
+# Qfull <- Qfull %>%
+#   mutate(Date=as.Date(datetime))%>%
+#   select(-datetime)
+# Qfull <- Qfull[, c("Date", "Flow")]
+# 
+# # Plot the data
+# QPlot <- Q
+# QPlot$datetime <- as.Date(QPlot$datetime)
+# 
+# ggplot(data=QPlot, mapping=aes(x=datetime))+
+#   geom_line(aes(y=Flow)) +
+#   scale_x_date(date_labels=("%Y"), date_breaks=("years"))
+```
+
+## Separate the streamflow into calibration and validation periods and save them as .csv files
+The model starts on September 15, 2006 (day 258), so will choose the calibration periods to also start on Sept. 15 (day 258) and end on Sept. 14 (day 257).
+
+Spin-up period: of 2006-258 through 2007-257.
+
+Calibration period: 2007-258 through 2010-257, and 2013-258 to 2015-257 (inclusive; start Sept. 15 and end Sept. 14)
+
+Validation period: remainder of the modelled period, i.e. 2010-258 to 2013-257, and 2015-258 to 2016-258 
+
+```{r eval=FALSE}
+# # Qfull is the complete, original streamflow dataset, filtered to start at 2005-01-01 and to replace missing values with -9999
+# 
+# Qfull <- Qfull %>%
+#   filter(Date>="2005-01-01") %>%
+#   select(-ID, -PARAM)
+# Qfull$Value[is.na(Qfull$Value)==TRUE] <- -9999
+# 
+# # Create Qcal which contains only the measured flow during the calibration period
+# Qcal1 <- Qfull
+# Qcal1 <- filter(Qcal1, Date>="2007-09-15" & Date<="2010-09-14")
+# summary(Qcal1)
+# 
+# Qcal2 <- Qfull
+# Qcal2 <- filter(Qcal2, Date >= "2013-09-15" & Date <= "2015-09-14")
+# 
+# Qcal <- rbind(Qcal1, Qcal2)
+# Qcal <- rename(Qcal, CalFlow=Flow)
+# 
+#  
+# # Create Qval which contains only the measured flow during the validation period
+# Qval1 <- Qfull
+# Qval1 <- filter(Qval1, Date>="2010-09-15" & Date<="2013-09-14")
+# 
+# Qval2 <- Qfull
+# Qval2 <- filter(Qval2, Date >= "2015-09-15" & Date <= "2016-09-14")
+# 
+# Qval <- rbind(Qval1, Qval2)
+# Qval <- rename(Qval, ValFlow=Flow)
+# 
+# # Create the "negative" flow, which changes the sign of flows > 0, and represents missing and zero flows with -9999
+# Qneg <- mutate(Qfull, Negative=ifelse(Flow==0|Flow==-9999,-9999,-1*Flow))
+# 
+# Qneg_check <- filter(Qneg, Negative==-9999)
+# 
+# Qneg <- select(Qneg, Date, Negative)
+# 
+# # Put the negative, calibration, and validation flows together into one dataframe
+# Qboth <- merge(Qneg, Qcal,by="Date", all=TRUE )
+# Qboth <- merge(Qboth, Qval, by="Date", all=TRUE)
+# 
+# Qboth$CalAll <- NA
+# Qboth$ValAll <- NA
+# 
+# # This section populates the CalAll and ValAll columns with the flow values (actual or -ve values) for the whole timeperiod. 
+# 
+# #First, puts the calibration period flows into the CalAll column. Then, pastes negative streamflow into the missing (NA) points. Then does the same for the ValAll column.
+# Qboth$CalAll <- Qboth$CalFlow
+# Qboth$CalAll[is.na(Qboth$CalAll)] <- paste0(Qboth$Negative[is.na(Qboth$CalAll)])
+# Qboth$CalAll <- as.double(Qboth$CalAll)
+# Qboth$ValAll <- Qboth$ValFlow
+# Qboth$ValAll[is.na(Qboth$ValAll)] <- paste0(Qboth$Negative[is.na(Qboth$ValAll)])
+# Qboth$ValAll <- as.double(Qboth$ValAll)
+# 
+# # Note one last thing: the model needs a positive value on the start date of the model. Therefore, change the streamflow value on 2006-09-15 to a positive value
+# 
+# ModelStart <- which(Qboth$Date==as.Date("2006-09-15")) #Returns the line where date=2006=09-15
+# 
+# Qboth$CalAll[ModelStart] <- -1*Qboth$CalAll[ModelStart]
+# Qboth$ValAll[ModelStart] <- -1*Qboth$ValAll[ModelStart]
+# 
+# Qboth[ModelStart,]
+# 
+# #Plot the flow values to check to make sure the cal/val periods are right, and negative flows are represented. 
+#     # Note: first need to change all -9999 values to NA so it doesn't throw off the plot
+# 
+# QPlot <- Qboth
+# QPlot <- mutate(QPlot, CalAll=ifelse(CalAll==-9999,NA,CalAll), ValAll=ifelse(ValAll==-9999,NA,ValAll))
+# 
+# ggplot(data=QPlot, mapping=aes(x=Date))+
+#   geom_line(aes(y=CalAll), color="blue", size=1) +
+#   scale_x_date(date_labels=("%Y"), date_breaks=("years")) +
+#   geom_line(aes(y=ValAll), color="red", size=0.5)+
+#   labs(x="Date", y="Discharge")
+# 
+# 
+# #Check that the morphed dataset is the same as the original Q dataset
+# Qcheck <- Qfull
+# Qcheck$Check <- NA
+# Qcheck$Check <- abs(QPlot$CalAll)-Qcheck$Flow
+# CalCheck <- force(unique(Qcheck$Check))
+# CalCheck
+# 
+# Qcheck$Check <- abs(QPlot$ValAll)-Qcheck$Flow
+# ValCheck <- force(unique(Qcheck$Check))
+# ValCheck
+
+```
+
+
+
+## Write the streamflow values to file - both an excel .csv file including the date, and a .csv file with only the flow values
+```{r}
+
+# QFinal <- select(Qfull, Date, Flow)
+# QWrite <- select(Qfull, Flow)
+# write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_full.xlsx.csv")
+# write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_full.csv", col_names=FALSE)
+# 
+# QFinal <- select(Qboth, Date, CalAll)
+# QWrite <- select(Qboth, CalAll)
+# write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_cal.xlsx.csv")
+# write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_cal.csv", col_names=FALSE)
+# 
+# QFinal <- select(Qboth, Date, ValAll)
+# QWrite <- select(Qboth, ValAll)
+# write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_val.xlsx.csv")
+# write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_val.csv", col_names=FALSE)
+```
+
+## Load and plot precipitation used in the model to compare with streamflow
+```{r}
+# #Load in the precipitation data used in the model
+# Pload <- read.csv("F:/ECCC_Project/MESH Model/Baker Creek Model Files/Driving Data/Original/basin_rain.xlsx.csv")
+# 
+# #Since the units of P used in the model are mm/s, convert to mm by multiplying by 60*30
+# P <- Pload
+# P <- mutate(P, P_mm=Combined*60*30)
+# colnames(P) <- c("Datetime", "P_mm_s", "P_mm")
+# 
+# #Convert to daily rainfall
+# P <- mutate(P, Date=date(Datetime))
+# 
+# P_daily <- P
+# P_daily <- P_daily %>%
+#   group_by(Date) %>%
+#   summarise(DailySum=sum(P_mm))%>%
+#   filter(Date>= as.Date("2006-09-15"))%>%
+#   filter(Date <= as.Date("2016-09-14"))
+# 
+# write_excel_csv(P_daily, "F:/ECCC_Project/R Code/DailyPModel.csv")
+# 
+# P_Report <- ggplot(P_daily) +
+#   geom_col(mapping=aes(x=Date, y=DailySum))+
+#   scale_x_date(date_labels=("%Y"), date_breaks=("years"))+
+#   ylab("Daily Precipitation (mm)")+
+#   theme(axis.title.x = element_blank(), axis.text.x=element_text(size=0), axis.title.y=element_text(size=7))+
+#   ylim(30,0)
+# 
+# P_Report
+# 
+# PandQPlot <- ggarrange(P_Report, Q_Report, ncol=1, nrow=2, heights=c(0.75, 1.5), align="v")
+# 
+# PandQPlot
+# 
+# ggsave("F:/ECCC_Project/Report/MWSCapstoneReport/figures/PandQPlot.jpg", plot=PandQPlot, width=17.75, height=9, units="cm")
+
+```

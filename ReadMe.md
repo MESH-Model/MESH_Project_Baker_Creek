@@ -6,10 +6,12 @@
   **Advisors:** Bruce Davison, ECCC and Andrew Ireson, GIWS  
 
 ## Date
-May-August, 2019
+November, 2019
 
 ## Purpose
-  This project was completed as the Capstone Project for the Masters of Water Security (MWS) program at the University of Saskatchewan in partnership with Environment and Climate Change Canada (ECCC). The project replicated the methodology of a project conducted in the White Gull Creek watershed (SK) in 2017 by a previous MWS student, Herbert Mkandla, and aimed to explore the effects of various representations of sub-grid spatial heterogeneity on model performance. The project also compared the WATROF and PDMROF algorithms.
+  This project was completed as the Capstone Project for the Masters of Water Security (MWS) program at the University of Saskatchewan in partnership with Environment and Climate Change Canada (ECCC) between May-August, 2019. The project replicated the methodology of a project conducted in the White Gull Creek watershed (SK) in 2017 by a previous MWS student, Herbert Mkandla, and aimed to explore the effects of various representations of sub-grid spatial heterogeneity on model performance. The project also compared the WATROF and PDMROF algorithms.
+
+  The November update corrected gaps and duplicates in the driving data, and ran the calibrations for each scenario again with the same methodology and MESH code versions as the original project.
 
 ## Progress / Conclusion
   The modelling project for the purpose of the MWS Capstone Project is complete, though more work could be done to the model of the Baker Creek watershed to get better performance results.
@@ -19,9 +21,7 @@ May-August, 2019
 ___
 ___
 # Folder Structure
-All folders are tracked by Git except:
-- Data/Raw
-- Model/Scenario*/Outputs
+So far, this folder is not tracked in GitHub.
 
 The files in these folders are stored on Graham and can be synced with the local machine via the respective push/pull bash scripts included in the Data/Raw and Model folders.
 

@@ -1,0 +1,23 @@
+Baker Creek, NWT                                                                                                            01comment line 1
+H. Brauner                                                                                                                02comment line 2
+SENS/GIWS/ECCC, University of Saskatchewan, Saskatoon, SK                                                                                                             03comment line 3
+_DEGLAT_      _DEGLON_      _ZRFM_      _ZRFH_      _ZBLD_      _GC_      _ILW_     _NL_      _NM_            04DEGLAT/DEGLON/ZRFM/ZRFH/ZBLD/GC/ILW/NL/NM
+    0.2078    0.0075    0.000   0.1529   0.6255     _LAMX-NL1_    _LAMX-BL1_    _LAMX-C1_   _LAMX-G1_       05Land class type/fcanrow/pamxrow
+_LNZ0-NL1_    _LNZ0-BL1_    _LNZ0-C1_   _LNZ0-G1_   _LNZ0-U1_     1.735197E+00    5.307050E-01    0.000   4.549441E-01       06lnz0row/pamnrow
+4.458660E-02    5.813993E-02    0.000   2.370169E-02   1.991126E-01     9.587654E+00    1.974411E+01    0.000   1.493458E+00       07alvcrow/cmasrow
+1.840217E-01    2.875005E-01    0.000   2.470381E-01   5.632852E-01     3.890784E-01    9.917452E-01    0.000   7.650983E-01       08alirow/rootrow
+2.333260E+02    9.890862E+01    0.000   1.247700E+02                 30.0    40.0    30.0   30.0       09rsmnrow/qa50row
+0.650    0.500    0.500   0.500                 1.050    0.600    1.000   1.000       10vpdarow/vpbprow
+100.000    100.000    100.000   100.000                5.000    5.000    5.000   5.000       11psgarow/psgbrow
+1.000       1.114160E+00      1.000    0.0036                                                                          12drnrow/sdeprow/farerow/ddenrow
+0.06    4.846892E-01      1.988229E-01    4.722519E-05   1                                                                13xslprow/grkfrow/manrow/WFCIROW/midrow
+0     3.665403E+00     2.856498E-02   1.834996E+01                                                                         14sand
+39.92     4.055586E+01     7.037932E+01   9.073441E+01                                                                         15clay
+60.08     39.6265     10.07   0                                                                         16org
+4.500     5.500     4.500   0.000     3.565      0.0      4.784                                            17temperature-soil/can/sno/pnd
+0.4308     0.5513     0.5513   0.5513     0.000     0.000     0.000   0.000   0.0                                18soil moisture-soil/ice/pnd
+0.0000      0.0000      0.00       0.200      100.0000      1.000                                             19rcan/scan/sno/albs/rho/gro
+          0         0         0         0         0         0                                                             20                                       | *
+          0         0         0         0         0         0                                                             21                                       | *
+          0         0         1         2005                                                                              22IHOUR/IMIN/IDAY/IYEAR                  | 4I10
+123456789*123456789*123456789*123456789*123456789*123456789*123456789*123

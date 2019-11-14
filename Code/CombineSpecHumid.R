@@ -5,8 +5,8 @@ library(tidyverse)
 library(dplyr)
 library(lubridate)
 
+
 #####Load the individual driving data files
-setwd("C:/Users/haley/OneDrive/Documents/1.MWS2018-2019/T2/Project/ECCC_Project/R Code/")
 load("./Vital.Rda")
 load("./Landing.Rda")
 load("./Yknife_HalfHr.Rda")
@@ -19,16 +19,16 @@ p <- period(6, units="day")
 VitalShift09 <- mutate(Vital, DateTime=if_else(year(DateTime)==2009,DateTime-p,DateTime))
 
 ##### Scale the specific humidity to 40m by converting RH to q using T40m rather than T2m for Vital and Yellowknife stations only (won't use Landing data in the final combined)
-load(file="./TempScaledCombined.Rda")
-
-VitalShiftq <- merge(VitalShift09, TComb, by="DateTime", all=TRUE)
-VitalShiftq <- VitalShiftq %>%
-  mutate(T_40m=Vital2.8) %>%
-  select(-c("GEMVital", "YellowknifeA", "Vital2.8", "Vital4.4", "Combined")) %>%
-  mutate(ea_40m=RH_2m/100*10^((0.7859+0.03477*T_40m)/(1.0+0.00412*T_40m)+2))%>%
-  mutate(q_40m=0.622*ea_40m/(AirP_Pa-0.378*ea_40m)) %>%
-  filter(is.na(DateTime)==FALSE, is.na(Station)==FALSE) %>%
-  select(-ea_40m)
+# load(file="./TempScaledCombined.Rda")
+# 
+# VitalShiftq <- merge(VitalShift09, TComb, by="DateTime", all=TRUE)
+# VitalShiftq <- VitalShiftq %>%
+#   mutate(T_40m=Vital2.8) %>%
+#   select(-c("GEMVital", "YellowknifeA", "Vital2.8", "Vital4.4", "Combined")) %>%
+#   mutate(ea_40m=RH_2m/100*10^((0.7859+0.03477*T_40m)/(1.0+0.00412*T_40m)+2))%>%
+#   mutate(q_40m=0.622*ea_40m/(AirP_Pa-0.378*ea_40m)) %>%
+#   filter(is.na(DateTime)==FALSE, is.na(Station)==FALSE) %>%
+#   select(-ea_40m)
 
   ### Didn't make much difference, so use the observed q in the model
 
@@ -36,11 +36,18 @@ VitalShiftq <- VitalShiftq %>%
 ##Use this first section to choose whether or not to use the shifted version of the Vital data, or the original
 
 DrivingShift <- rbind(VitalShift09, Landing, Yknife, GEM_data)
-DrivingOrig <- rbind(Vital, Landing, Yknife, GEM_data)
-DrivingShiftq <- rbind(VitalShiftq, Landing, Yknife, GEM_data)
+q1 <- select(DrivingShift, DateTime, Station, q_1.1m, q_2m, q_4.4m, q_40m)
+#---OR---
+
+# DrivingOrig <- rbind(Vital, Landing, Yknife, GEM_data)
+# q1 <- select(DrivingOrig, DateTime, Station, q_1.1m, q_2m, q_4.4m, q_40m)
+
+#---OR---
+# DrivingShiftq <- rbind(VitalShiftq, Landing, Yknife, GEM_data)
+# q1 <- select(DrivingShiftq, DateTime, Station, q_1.1m, q_2m, q_4.4m, q_40m)
 
 ##### Explore the Specific Humidity data
-q1 <- select(DrivingShift, DateTime, Station, q_1.1m, q_2m, q_4.4m, q_40m)
+
 q <- q1
 q <- q %>% gather(q_1.1m, q_2m, q_4.4m, q_40m, key="Height", value="q")%>%
   arrange(DateTime) %>%
@@ -103,6 +110,25 @@ qComb$Combined <- as.double(qComb$Combined)
 qComb$Combined[is.na(qComb$Combined)] <- paste0(qComb$GEMVital[is.na(qComb$Combined)])
 qComb$Combined <- as.double(qComb$Combined)
 
+# Check for gaps and duplicates in the final datasets
+
+library(CRHMr)
+q_gaps <- qComb %>%
+  select(DateTime, Combined)%>%
+  rename(datetime=DateTime)
+findGaps(q_gaps)
+
+q_dups <- qComb%>%
+  rename(datetime=DateTime)
+findDupes(q_dups)
+q_dups <- deDupe(q_dups)
+if (is.character(q_dups)){
+  qComb <- qComb
+}else{
+  qComb <- q_dups %>%
+    rename(DateTime=datetime)
+}
+
 #Plot and check the combination
 Check <- gather(qComb, GEMVital, Vital, Combined, key="Location", value="q")
 Check <- Check %>%
@@ -121,10 +147,20 @@ ggplot(data=q_05_11, mapping=aes(x=CommonDate, y=DayAvgq, color=Location, size=L
   scale_size(range=c(0.5,1.0), guide="none") +
   facet_grid(year(q_05_11$Date) ~ .) +
   scale_x_date(labels=function(x) format(x,"%d-%b")) +
-  labs(title="Specific Humidity - 2005-2011 (combined)")
+  labs(title="Specific Humidity - 2005-2011 (check)")
 
-setwd("C:/Users/haley/OneDrive/Documents/1.MWS2018-2019/T2/Project/ECCC_Project/R Code/")
+q_12_18 <- filter(Check, year(Date) %in% 2012:2018)
+ggplot(data=q_12_18, mapping=aes(x=CommonDate, y=DayAvgq, color=Location, size=LineSize)) +
+  geom_line() +
+  scale_size(range=c(0.5,1.0), guide="none") +
+  facet_grid(year(q_12_18$Date) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Specific Humidity - 2012-2018 (check)")
+
 qFinal <- select(qComb, DateTime, Combined)
 qWrite <- select(qComb, Combined)
-write_excel_csv(qFinal, "../MESH Model/Baker Creek Model Files/basin_humidity.xlsx.csv")
-write_tsv(qWrite, "../MESH Model/Baker Creek Model Files/basin_humidity.csv", col_names=FALSE)
+qWrite6GRU <- qWrite %>%
+  mutate(GRU2=Combined, GRU3=Combined, GRU4=Combined, GRU5=Combined, GRU6=Combined)
+write_excel_csv(qFinal, "../Data/Processed/Driving/basin_humidity.xlsx.csv")
+write_tsv(qWrite, "../Data/Processed/Driving/Scenario1/basin_humidity.csv", col_names=FALSE)
+write_excel_csv(qWrite6GRU, "../Data/Processed/Driving/Scenario2and3/basin_humidity.csv", col_names=FALSE) #Includes 6 columns with the "Combined" data - 1 per GRU

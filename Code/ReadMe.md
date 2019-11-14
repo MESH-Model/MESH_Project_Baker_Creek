@@ -6,10 +6,10 @@ The driving data for the model was generated from combination of on-site observa
 
 - Download_Write_Weather_Data.R
   - Used to download and write a .Rda file for the Yellowknife A data
-- Prepare_Driving_Data.R
+- BakerCreekDataPrep.Rmd
   - Used to put the data from all sources into data frames with a consistent format (i.e. same number and names of columns, some unit conversions)
 - Combine*.R
-    - Used to combine the data from all souces into one driving data file for each of the 7 variables required for MESH
+    - Used to combine the data from all sources into one driving data file for each of the 7 variables required for MESH
 - StreamflowPrep.Rmd
     - Used to prepare streamflow data for the model
     - Creates 3 copies: one for calibration (i.e. sets NA values for the model period not used in the calibration), one for validation, and one for the whole model period

@@ -6,17 +6,16 @@ library(dplyr)
 library(lubridate)
 
 #####Load the individual driving data files
-setwd("C:/Users/haley/OneDrive/Documents/1.MWS2018-2019/T2/Project/ECCC_Project/R Code/")
 load("./Vital.Rda")
 load("./Landing.Rda")
 load("./GEM_data.Rda")
 
 GEM_data <- filter(GEM_data, year(DateTime)>= 2005) #Filter down GEM data since longer period
 
-# p <- period(6, units="day")
-# VitalShift09 <- mutate(Vital, DateTime=if_else(year(DateTime)==2009,DateTime-p,DateTime))
+# p <- period(6, units="day") VitalShift09 <- mutate(Vital,
+# DateTime=if_else(year(DateTime)==2009,DateTime-p,DateTime))
 
-##### Remove Vital data in 2009 from June 21 to the end of the year for Kin and Lin, and 2016 before (and including) April 16 for the Kin data
+##### Remove Vital data in 2008 from June 21 to the end of the year for Kin and Lin, and 2016 before (and including) April 16 for the Kin data
 VitalKin <- filter(Vital, !(date(DateTime)>= "2008-06-20" & date(DateTime)<= "2008-12-31"))
 VitalKin <- filter(VitalKin, !(date(DateTime)>="2016-04-01"&date(DateTime)<"2016-04-16"))
 #####Shift the 2009 Vital data back by 3 days to match the Yellowknife and GEM Temperature data
@@ -29,16 +28,25 @@ VitalLin <- mutate(VitalLin, DateTime=if_else(year(DateTime)==2009,DateTime-p,Da
 #####Combine all the data
 ##Use this first section to choose whether or not to use the shifted, filtered, or original version of the Vital data
 
-DrivingShift <- rbind(VitalShift09, Landing, GEM_data)
+#DrivingShift <- rbind(VitalShift09, Landing, GEM_data)
+#Kin1 <- select(DrivingShift, DateTime, Station, Kin)
 
-DrivingOrig <- rbind(Vital, Landing, GEM_data)
+#---OR---
+
+# DrivingOrig <- rbind(Vital, Landing, GEM_data)
+# Kin1 <- select(DrivingOrig, DateTime, Station, Kin)
+# Lin1 <- select(DrivingOrig, DateTime, Station, Lin)
+
+#---OR---
 
 DrivingKin <- rbind(VitalKin, Landing, GEM_data)
+Kin1 <- select(DrivingKin, DateTime, Station, Kin)
 
 DrivingLin <- rbind(VitalLin, Landing, GEM_data)
+Lin1 <- select(DrivingLin, DateTime, Station, Lin)
 
 ##### Explore the Kin (incoming shortwave radiation) data
-Kin1 <- select(DrivingKin, DateTime, Station, Kin)
+
 Kin <- Kin1
 Kin <- Kin %>% 
   filter(!Station %in% c("GEMLanding", "GEMYellowknifeA", "YellowknifeA")) %>%
@@ -49,19 +57,19 @@ Kin <- Kin %>%
 Kin$CommonDate <- as.Date(paste0("2001-", format(Kin$Date, "%j")),"%Y-%j")
 
 #Plot and compare the data
-Kin_05_11 <- filter(Kin, year(Date)>=2005 & year(Date)<=2011)
-ggplot() +
-  geom_line(data=Kin_05_11, mapping=aes(x=CommonDate, y=DayAvgK, color=Station), size=0.5) +
-  facet_grid(year(Kin_05_11$Date) ~ .) +
-  scale_x_date(labels=function(x) format(x,"%d-%b")) +
-  labs(title="Incoming Shortwave - 2005-2011(filtered,shifted)")
-
-Kin_12_18 <- filter(Kin, year(Date)>=2012)
-ggplot() +
-  geom_line(data=Kin_12_18, mapping=aes(x=CommonDate, y=DayAvgK, color=Station), size=0.5) +
-  facet_grid(year(Kin_12_18$Date) ~ .) +
-  scale_x_date(labels=function(x) format(x,"%d-%b")) +
-  labs(title="Incoming Shortwave - 2012-2018(filtered)")
+# Kin_05_11 <- filter(Kin, year(Date)>=2005 & year(Date)<=2011)
+# ggplot() +
+#   geom_line(data=Kin_05_11, mapping=aes(x=CommonDate, y=DayAvgK, color=Station), size=0.5) +
+#   facet_grid(year(Kin_05_11$Date) ~ .) +
+#   scale_x_date(labels=function(x) format(x,"%d-%b")) +
+#   labs(title="Incoming Shortwave - 2005-2011(filtered,shifted)")
+# 
+# Kin_12_18 <- filter(Kin, year(Date)>=2012)
+# ggplot() +
+#   geom_line(data=Kin_12_18, mapping=aes(x=CommonDate, y=DayAvgK, color=Station), size=0.5) +
+#   facet_grid(year(Kin_12_18$Date) ~ .) +
+#   scale_x_date(labels=function(x) format(x,"%d-%b")) +
+#   labs(title="Incoming Shortwave - 2012-2018(filtered)")
 # 
 # Kin08Inspect <- filter(Kin, DateTime>="2008-06-20 00:00:00")
 # Kin08Inspect <- spread(Kin08Inspect, key="Station", value="Kin")
@@ -69,7 +77,7 @@ ggplot() +
 
 
 ##### Explore the Lin (incoming longwave radiation) data
-Lin1 <- select(DrivingLin, DateTime, Station, Lin)
+
 Lin <- Lin1
 Lin <- Lin %>% 
   filter(!Station %in% c("GEMLanding", "GEMYellowknifeA", "Landing", "YellowknifeA")) %>%
@@ -124,6 +132,27 @@ KinComb$Combined <- as.double(KinComb$Combined)
 KinComb$Combined[is.na(KinComb$Combined)] <- paste0(KinComb$GEMVital[is.na(KinComb$Combined)])
 KinComb$Combined <- as.double(KinComb$Combined)
 
+KinComb <- mutate(KinComb, Combined=ifelse(Combined<=0,0,Combined))
+
+# Check for gaps and duplicates in the final datasets
+
+library(CRHMr)
+KinComb_gaps <- KinComb %>%
+  select(DateTime, Combined)%>%
+  rename(datetime=DateTime)
+findGaps(KinComb_gaps)
+
+KinComb_dups <- KinComb%>%
+  rename(datetime=DateTime)
+findDupes(KinComb_dups)
+KinComb_dups <- deDupe(KinComb_dups)
+if (is.character(KinComb_dups)){
+  KinComb <- KinComb
+}else{
+  KinComb <- KinComb_dups %>%
+    rename(DateTime=datetime)
+}
+
 #Plot and check the combination
 Check <- gather(KinComb, GEMVital, Vital, Landing, Combined, key="Location", value="Kin")
 Check <- Check %>%
@@ -152,11 +181,15 @@ ggplot(data=Kin_12_18, mapping=aes(x=CommonDate, y=DayAvgK, color=Location, size
   scale_x_date(labels=function(x) format(x,"%d-%b")) +
   labs(title="Incoming Shortwave - 2012-2018(check)")
 
-setwd("C:/Users/haley/OneDrive/Documents/1.MWS2018-2019/T2/Project/ECCC_Project/R Code/")
+
 KFinal <- select(KinComb, DateTime, Combined)
 KWrite <- select(KinComb, Combined)
-write_excel_csv(KFinal, "../MESH Model/Baker Creek Model Files/basin_shortwave.xlsx.csv")
-write_tsv(KWrite, "../MESH Model/Baker Creek Model Files/basin_shortwave.csv", col_names=FALSE)
+KWrite6GRU <- KWrite %>%
+  mutate(GRU2=Combined, GRU3=Combined, GRU4=Combined, GRU5=Combined, GRU6=Combined)
+write_excel_csv(KFinal, "../Data/Processed/Driving/basin_shortwave.xlsx.csv")
+write_tsv(KWrite, "../Data/Processed/Driving/Scenario1/basin_shortwave.csv", col_names=FALSE)
+write_excel_csv(KWrite6GRU, "../Data/Processed/Driving/Scenario2and3/basin_shortwave.csv", col_names=FALSE) #Includes 6 columns with the "Combined" data - 1 per GRU
+
 
 #####  Combine the Lin dataset and write to file
 ###In order to combine, need the columns to be DateTime, Station1, Station2, etc.; make sure you haven't calculated Daily average values above (comment out the "group_by" and "summarise" lines above)
@@ -179,6 +212,25 @@ LinComb$Combined[is.na(LinComb$Combined)] <- paste0(LinComb$Vital[is.na(LinComb$
 LinComb$Combined <- as.double(LinComb$Combined)
 LinComb$Combined[is.na(LinComb$Combined)] <- paste0(LinComb$GEMVital[is.na(LinComb$Combined)])
 LinComb$Combined <- as.double(LinComb$Combined)
+
+# Check for gaps and duplicates in the final datasets
+
+library(CRHMr)
+LinComb_gaps <- LinComb %>%
+  select(DateTime, Combined)%>%
+  rename(datetime=DateTime)
+findGaps(LinComb_gaps)
+
+LinComb_dups <- LinComb%>%
+  rename(datetime=DateTime)
+findDupes(LinComb_dups)
+LinComb_dups <- deDupe(LinComb_dups)
+if (is.character(LinComb_dups)){
+  LinComb <- LinComb
+}else{
+  LinComb <- LinComb_dups %>%
+    rename(DateTime=datetime)
+}
 
 #Plot and check the combination
 Check <- gather(LinComb, GEMVital, Vital, Combined, key="Location", value="Lin")
@@ -208,9 +260,12 @@ ggplot(data=Lin_12_18, mapping=aes(x=CommonDate, y=DayAvgL, color=Location, size
   scale_x_date(labels=function(x) format(x,"%d-%b")) +
   labs(title="Incoming Longwave - 2012-2018(check)")
 
-setwd("C:/Users/haley/OneDrive/Documents/1.MWS2018-2019/T2/Project/ECCC_Project/R Code/")
+
+#Write the .csv files for the model
 LFinal <- select(LinComb, DateTime, Combined)
 LWrite <- select(LinComb, Combined)
-write_excel_csv(LFinal, "../MESH Model/Baker Creek Model Files/basin_longwave.xlsx.csv")
-write_tsv(LWrite, "../MESH Model/Baker Creek Model Files/basin_longwave.csv", col_names=FALSE)
-
+LWrite6GRU <- LWrite %>%
+  mutate(GRU2=Combined, GRU3=Combined, GRU4=Combined, GRU5=Combined, GRU6=Combined)
+write_excel_csv(LFinal, "../Data/Processed/Driving/basin_longwave.xlsx.csv")
+write_tsv(LWrite, "../Data/Processed/Driving/Scenario1/basin_longwave.csv", col_names=FALSE)
+write_excel_csv(LWrite6GRU, "../Data/Processed/Driving/Scenario2and3/basin_longwave.csv", col_names=FALSE) #Includes 6 columns with the "Combined" data - 1 per GRU

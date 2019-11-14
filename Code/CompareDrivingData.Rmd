@@ -1,0 +1,341 @@
+---
+title: "Driving Data Comparison"
+output: html_notebook
+---
+
+# Load Libraries
+```{r}
+library(tidyverse)
+library(lubridate)
+library(readr)
+library(CRHMr)
+```
+
+# Load driving data from the Capstone project
+```{r}
+CapstoneFolder <- "C:/Users/hlb749/OneDrive - University of Saskatchewan/CapstoneProjectFiles/MESH Model/Baker Creek Model Files/Driving Data/Original/"
+
+q_old <- as.data.frame(read_csv(paste0(CapstoneFolder,"basin_humidity.xlsx.csv"), skip=1, col_names=c("datetime", "q")))
+
+L_old <- as.data.frame(read_csv(paste0(CapstoneFolder,"basin_longwave.xlsx.csv"), skip=1, col_names=c("datetime", "L")))
+
+K_old <- as.data.frame(read_csv(paste0(CapstoneFolder,"basin_shortwave.xlsx.csv"), skip=1, col_names=c("datetime", "K")))
+
+AirP_old <- as.data.frame(read_csv(paste0(CapstoneFolder,"basin_pres.xlsx.csv"), skip=1, col_names=c("datetime", "AirP")))
+
+P_old <- as.data.frame(read_csv(paste0(CapstoneFolder,"basin_rain.xlsx.csv"), skip=1, col_names=c("datetime", "P")))
+
+T_old <- as.data.frame(read_csv(paste0(CapstoneFolder,"basin_temperature.xlsx.csv"), skip=1, col_names=c("datetime", "T")))
+
+u_old <- as.data.frame(read_csv(paste0(CapstoneFolder,"basin_wind.xlsx.csv"), skip=1, col_names=c("datetime", "u")))
+
+q_old[,1] <- as.POSIXct(q_old[,1], tz="MST")
+L_old[,1] <- as.POSIXct(L_old[,1], tz="MST")
+K_old[,1] <- as.POSIXct(K_old[,1], tz="MST")
+AirP_old[,1] <- as.POSIXct(AirP_old[,1], tz="MST")
+P_old[,1] <- as.POSIXct(P_old[,1], tz="MST")
+T_old[,1] <- as.POSIXct(T_old[,1], tz="MST")
+u_old[,1] <- as.POSIXct(u_old[,1], tz="MST")
+
+summary(u_old)
+q_old[1,1]
+
+findGaps(q_old)
+findDupes(q_old)
+
+
+```
+
+## Summary
+
+The "old" datasets used in the Baker Creek model during the Capstone Project had the following gaps/dupes:
+- 14 gaps (1/year between 2005-2018) of length 1 hour (2 30-min timesteps) for the variables q, L, K, AirP, and u
+- No gaps or dupes in the precipitation data
+- 14 gaps (1/year between 2005-2018) of length 1 hour (2 30-min timesteps), as well as 172 duplicate datetimes for Temperature data
+
+Below, I will show plots of how MESH was reading the data (couting time from the start of the data of 2005-01-01 00:00 MST)
+
+# Combine "old" driving data into one dataframe with datetimes assigned how MESH would read them
+```{r}
+# Combine "old" data that has the same number of gaps into one dataframe (q, L, K, AirP, and u)
+    # Note: units are those used by MESH
+Old1 <- q_old
+Old1 <- merge(x=Old1, y=L_old, by="datetime", all=TRUE)
+Old1 <- merge(x=Old1, y=K_old, by="datetime", all=TRUE)
+Old1 <- merge(x=Old1, y=AirP_old, by="datetime", all=TRUE)
+Old1 <- merge(x=Old1, y=u_old, by="datetime", all=TRUE)
+
+# Change the datetime column to be the same as MESH would interpret (couting from 2005-01-01 00:00)
+Timesteps <- as.data.frame(seq(as.POSIXct("2005-01-01 00:00", tz="MST"), as.POSIXct("2018-12-31 23:30", tz="MST"), by=(60*30)))# by is seconds
+
+Timesteps1 <- as.data.frame(Timesteps[1:nrow(Old1),])
+colnames(Timesteps1) <- "datetime"
+
+Old2 <- Old1
+Old2$datetime <- Timesteps1$datetime
+
+# Add Precip to the Old dataframe (Precip didn't have any gaps or dupes, so MESH read it right)
+P_old_trim <- P_old[1:nrow(Old2),]
+Old2 <- merge(x=Old2, y=P_old_trim, by="datetime", all=TRUE)
+
+# Change the datetime of the Temp dataframe to be how MESH would interpret it and add to the Old2 dataframe
+Timesteps2 <- as.data.frame(Timesteps[1:nrow(T_old),])
+colnames(Timesteps2) <- "datetime"
+
+T_old2 <- T_old
+T_old2$datetime <- Timesteps2$datetime
+T_old2 <- T_old2[1:nrow(Old2),]
+
+Old2 <- merge(x=Old2, y=T_old2, by="datetime", all=TRUE)
+
+Old <- Old2
+```
+
+# Load newly-generated driving data
+```{r}
+NewFolder <- "C:/Users/hlb749/OneDrive - University of Saskatchewan/GitProjects/GitHub/MESH_Project_Baker_Creek/Data/Processed/Driving/"
+
+q_new <- as.data.frame(read_csv(paste0(NewFolder, "basin_humidity.xlsx.csv"), skip=1, col_names=c("datetime", "q")))
+
+L_new <- as.data.frame(read_csv(paste0(NewFolder, "basin_longwave.xlsx.csv"), skip=1, col_names=c("datetime", "L")))
+
+K_new <- as.data.frame(read_csv(paste0(NewFolder, "basin_shortwave.xlsx.csv"), skip=1, col_names=c("datetime", "K")))
+
+AirP_new <- as.data.frame(read_csv(paste0(NewFolder, "basin_pres.xlsx.csv"), skip=1, col_names=c("datetime", "AirP")))
+
+P_new <- as.data.frame(read_csv(paste0(NewFolder, "basin_rain.xlsx.csv"), skip=1, col_names=c("datetime", "P")))
+
+T_new <- as.data.frame(read_csv(paste0(NewFolder, "basin_temperature.xlsx.csv"), skip=1, col_names=c("datetime", "T")))
+
+u_new <- as.data.frame(read_csv(paste0(NewFolder, "basin_wind.xlsx.csv"), skip=1, col_names=c("datetime", "u")))
+
+q_new[,1] <- as.POSIXct(q_new[,1], tz="MST")
+L_new[,1] <- as.POSIXct(L_new[,1], tz="MST")
+K_new[,1] <- as.POSIXct(K_new[,1], tz="MST")
+AirP_new[,1] <- as.POSIXct(AirP_new[,1], tz="MST")
+P_new[,1] <- as.POSIXct(P_new[,1], tz="MST")
+T_new[,1] <- as.POSIXct(T_new[,1], tz="MST")
+u_new[,1] <- as.POSIXct(u_new[,1], tz="MST")
+
+q_new[1,1]
+class(q_new$datetime)
+```
+
+# Combine "new" data into one dataframe
+```{r}
+# Combine "new" data into one dataframe
+New <- AirP_new
+New$K <- K_new$K
+New$L <- L_new$L
+New$q <- q_new$q
+New$u <- u_new$u
+New$T <- T_new$T
+New <- merge(x=New, y=P_new, by="datetime", all=TRUE)
+New <- filter(New, datetime<=as.POSIXct("2018-12-31 02:00", tz="MST"))
+
+# Check for gaps and duplicates
+findGaps(New)
+findDupes(New)
+```
+
+# Plot-compare the daily averages of each variable (old and new)
+```{r}
+# Calculate daily averages
+Old_avg <- Old %>%
+  select(-P)%>%
+  mutate(Date=date(datetime))%>%
+  group_by(Date)%>%
+  summarise_all(mean)
+
+New_avg <- New %>%
+  select(-P)%>%
+  mutate(Date=date(datetime))%>%
+  group_by(Date)%>%
+  summarise_all(mean)
+
+# Calculate daily total P
+Old_P <- Old %>%
+  select(datetime, P)%>%
+  mutate(P=P*60*30)%>%
+  mutate(Date=date(datetime))%>%
+  group_by(Date)%>%
+  summarise(DailyP=sum(P))
+
+Old_AnnualP <- Old_P %>%
+  mutate(Year=year(Date))%>%
+  group_by(Year)%>%
+  summarise(AnnualP=sum(DailyP))
+
+New_P <- New %>%
+  select(datetime, P)%>%
+  mutate(P=P*60*30)%>%
+  mutate(Date=date(datetime))%>%
+  group_by(Date)%>%
+  summarise(DailyP=sum(P))
+
+New_AnnualP <- New_P %>%
+  mutate(Year=year(Date))%>%
+  group_by(Year)%>%
+  summarise(AnnualP=sum(DailyP))
+
+# Add CommonDate colums to the dataframes
+Old_avg$CommonDate <- as.Date(paste0("2001-", format(Old_avg$Date, "%j")),"%Y-%j")
+New_avg$CommonDate <- as.Date(paste0("2001-", format(New_avg$Date, "%j")),"%Y-%j")
+Old_P$CommonDate <- as.Date(paste0("2001-", format(Old_P$Date, "%j")),"%Y-%j")
+New_P$CommonDate <- as.Date(paste0("2001-", format(New_P$Date, "%j")),"%Y-%j")
+
+# Separate into shorter lengths for easier visualization
+Old1516 <- filter(Old, year(datetime)==2016, month(datetime)==07)
+Old1516$CommonDate <- as.Date(paste0("2001-", format(Old1516$datetime, "%j")),"%Y-%j")
+Old1516 <- mutate(Old1516, K=ifelse(K<=0, 0, K))
+
+New1516 <- filter(New, year(datetime)==2016, month(datetime)==07)
+New1516$CommonDate <- as.Date(paste0("2001-", format(New1516$datetime, "%j")),"%Y-%j")
+New1516 <- mutate(New1516, K=ifelse(K<=0, 0, K))
+
+Old06 <- filter(Old, year(datetime)==2006, month(datetime)==07)
+Old06 <- mutate(Old06, K=ifelse(K<=0, 0, K))
+New06 <- filter(New, year(datetime)==2006, month(datetime)==07)
+New06 <- mutate(New06, K=ifelse(K<=0, 0, K))
+
+Old1day <- filter(Old, year(datetime)==2016, month(datetime)==07, day(datetime)==01)
+Old1day <- mutate(Old1day, K=ifelse(K<=0, 0, K))
+New1day <- filter(New, year(datetime)==2016, month(datetime)==07, day(datetime)==01)
+New1day <- mutate(New1day, K=ifelse(K<=0, 0, K))
+
+Old0511 <- filter(Old_avg, year(Date)<= 2011)
+New0511 <- filter(New_avg, year(Date)<= 2011)
+Old1218 <- filter(Old_avg, year(Date)>= 2012)
+New1218 <- filter(New_avg, year(Date)>= 2012)
+
+Old_P0511 <- filter(Old_P, year(Date)<= 2011)
+Old_P1218 <- filter(Old_P, year(Date)>= 2012)
+New_P0511 <- filter(New_P, year(Date)<= 2011)
+New_P1218 <- filter(New_P, year(Date)>= 2012)
+
+KJuly2016plot<- ggplot() +
+  geom_line(data=Old1516, aes(x=datetime, y=K),color='blue') +
+  geom_line(data=New1516, aes(x=datetime, y=K),color='red')+
+  labs(title="Shortwave Radiation(2016) - old vs new")+
+  #theme(legend.position="right")+
+  scale_fill_discrete(name="Legend", labels=c("Old", "New"))
+
+KJuly2016plot<- ggplot() +
+  geom_line(data=Old1516, aes(x=datetime, y=K, colour="Old")) +
+  geom_line(data=New1516, aes(x=datetime, y=K, colour="New"))+
+  labs(title="Shortwave Radiation(2016) - old vs new")+
+  scale_colour_manual("", breaks = c("Old", "New"), values = c("red", "blue"))
+KJuly2016plot
+
+KJuly2006plot <- ggplot() +
+  geom_line(data=Old06, aes(x=datetime, y=K, colour="Old")) +
+  geom_line(data=New06, aes(x=datetime, y=K, colour="New"))+
+  labs(title="Shortwave Radiation (2006) - old vs new")+
+  scale_colour_manual("", breaks = c("Old", "New"), values = c("red", "blue"))
+KJuly2006plot
+
+KJuly1_2016plot <- ggplot() +
+  geom_line(data=Old1day, aes(x=datetime, y=K, colour="Old")) +
+  geom_line(data=New1day, aes(x=datetime, y=K, colour="New"))+
+  labs(title="Shortwave Radiation(July 1, 2016) - old vs new")+
+  scale_colour_manual("", breaks = c("Old", "New"), values = c("red", "blue"))
+KJuly1_2016plot
+
+LJuly1_2016plot <- ggplot() +
+  geom_line(data=Old1day, aes(x=datetime, y=L, colour="Old")) +
+  geom_line(data=New1day, aes(x=datetime, y=L, colour="New"))+
+  labs(title="Longwave Radiation(July 1, 2016) - old vs new")+
+  scale_colour_manual("", breaks = c("Old", "New"), values = c("red", "blue"))
+LJuly1_2016plot
+
+```
+Looking at the K2016plot and KJuly1_2016plot, it is clear that after 12 years of the 1 hour gap/year, shortwave radiation is completely out of phase from where it should be!
+ 
+# Other plot comparisons
+```{r}
+q2011plot<- ggplot() +
+  geom_line(data=Old0511, aes(x=CommonDate, y=q),color='blue') +
+  geom_line(data=New0511, aes(x=CommonDate, y=q),color='red')+
+  facet_grid(year(Old0511$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Average Specific Humidity (kg/kg) - old vs new")
+
+q2011plot
+
+q2018plot<- ggplot() +
+  geom_line(data=Old1218, aes(x=CommonDate, y=q),color='blue') +
+  geom_line(data=New1218, aes(x=CommonDate, y=q),color='red')+
+  facet_grid(year(Old1218$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Average Specific Humidity (kg/kg) - old vs new")
+
+q2018plot
+
+K2011plot<- ggplot() +
+  geom_line(data=Old0511, aes(x=CommonDate, y=K),color='blue') +
+  geom_line(data=New0511, aes(x=CommonDate, y=K),color='red')+
+  facet_grid(year(Old0511$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Average Incoming Shortwave Radiation (W/m2) - old vs new")
+
+K2011plot
+
+K2018plot<- ggplot() +
+  geom_line(data=Old1218, aes(x=CommonDate, y=K),color='blue') +
+  geom_line(data=New1218, aes(x=CommonDate, y=K),color='red')+
+  facet_grid(year(Old1218$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Average Incoming Shortwave Radiation (W/m2) - old vs new")
+
+K2018plot
+
+T2011plot<- ggplot() +
+  geom_line(data=Old0511, aes(x=CommonDate, y=T),color='blue') +
+  geom_line(data=New0511, aes(x=CommonDate, y=T),color='red')+
+  facet_grid(year(Old0511$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Average Temperature (K) - old vs new")
+
+T2011plot
+
+T2018plot<- ggplot() +
+  geom_line(data=Old1218, aes(x=CommonDate, y=T),color='blue') +
+  geom_line(data=New1218, aes(x=CommonDate, y=T),color='red')+
+  facet_grid(year(Old1218$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Daily Average Temperature (K) - old vs new")
+
+T2018plot
+
+P2011plot<- ggplot() +
+  geom_line(data=New_P0511, aes(x=CommonDate, y=DailyP),color='blue') +
+  geom_line(data=New_P0511, aes(x=CommonDate, y=DailyP),color='red')+
+  facet_grid(year(Old0511$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Total Daily Precipitation (mm) - old vs new")
+
+P2011plot
+
+P2018plot<- ggplot() +
+  geom_line(data=Old_P1218, aes(x=CommonDate, y=DailyP),color='blue') +
+  geom_line(data=New_P1218, aes(x=CommonDate, y=DailyP),color='red')+
+  facet_grid(year(Old1218$datetime) ~ .) +
+  scale_x_date(labels=function(x) format(x,"%d-%b")) +
+  labs(title="Total Daily Precipitation (mm) - old vs new")
+
+P2018plot
+
+
+```
+
+```{r}
+
+```
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

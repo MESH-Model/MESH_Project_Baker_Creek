@@ -1,0 +1,4 @@
+      0.15    0.15    #DELZ/ZBOT
+      0.25    0.40    #DELZ/ZBOT
+      0.70    1.10    #DELZ/ZBOT
+      3.00    4.10    #DELZ/ZBOT
