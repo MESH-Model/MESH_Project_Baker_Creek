@@ -591,56 +591,56 @@ This station includes both discharge (param=1) and water level (param=2) data fo
 ## Loading in the data
 
 ```{r eval=FALSE}
-# # Download the HYDAT database (if not already done so; takes about 10 mins)
-# 
-# hy_dir() # Returns the location of the Hydat database directory
-# download_hydat() # Downloads the hydat database; have to type a response (yes or no) and won't download again if you have the most recent version
-# 
-# Qload <- hy_daily_flows("07SB013", start_date="2005-01-01", end_date="2019-12-31")
-# Qload <- as.data.frame(Qload)
-# head(Qload)
-# summary(Qload)
+# Download the HYDAT database (if not already done so; takes about 10 mins)
+
+hy_dir() # Returns the location of the Hydat database directory
+download_hydat() # Downloads the hydat database; have to type a response (yes or no) and won't download again if you have the most recent version
+
+Qload <- hy_daily_flows("07SB013", start_date="2005-01-01", end_date="2019-12-31")
+Qload <- as.data.frame(Qload)
+head(Qload)
+summary(Qload)
 ```
 
 ## Using CRHMr to explore the missing values in the data
 ```{r eval=FALSE}
-# Q <- Qload
-# Q <- Q %>%
-#   select(-Parameter, -STATION_NUMBER, -Symbol)%>%
-#   rename(datetime=Date, Flow=Value)
-# 
-# # Add a time (used noon) for the daily flow values for use with POSIXct format
-# hour(Q$datetime) <- 12
-# Q$datetime <- force_tz(Q$datetime, tz="MST")
-# Q$datetime[1]
-# 
-# Q$datetime <- as.POSIXct(Q$datetime)
-# Q <- rename(Q, datetime=datetime)
-# class(Q$datetime)
-# 
-# # Find and explore gaps in the data
-# findGaps(Q, minlength=1, quiet=FALSE) #Stores the gap details in a file called "Qgaps.csv")
-# Qna <- filter(Q, is.na(Flow)==TRUE)
-#     # Any existing gaps were already "NA" values
-# 
-# # Replace NA valuses with -9999
-# Qfull <- Q
-# Qfull$Flow[is.na(Qfull$Flow)==TRUE] <- -9999
-# summary(Qfull)
-# 
-# # Change the format and name of datetime back to "Date
-# Qfull <- Qfull %>%
-#   mutate(Date=as.Date(datetime))%>%
-#   select(-datetime)
-# Qfull <- Qfull[, c("Date", "Flow")]
-# 
-# # Plot the data
-# QPlot <- Q
-# QPlot$datetime <- as.Date(QPlot$datetime)
-# 
-# ggplot(data=QPlot, mapping=aes(x=datetime))+
-#   geom_line(aes(y=Flow)) +
-#   scale_x_date(date_labels=("%Y"), date_breaks=("years"))
+Q <- Qload
+Q <- Q %>%
+  select(-Parameter, -STATION_NUMBER, -Symbol)%>%
+  rename(datetime=Date, Flow=Value)
+
+# Add a time (used noon) for the daily flow values for use with POSIXct format
+hour(Q$datetime) <- 12
+Q$datetime <- force_tz(Q$datetime, tz="MST")
+Q$datetime[1]
+
+Q$datetime <- as.POSIXct(Q$datetime)
+class(Q$datetime)
+
+# Find and explore gaps in the data
+findGaps(Q, minlength=1, quiet=FALSE) #Stores the gap details in a file called "Qgaps.csv")
+Qna <- filter(Q, is.na(Flow)==TRUE)
+    # Any existing gaps were already "NA" values
+
+# Replace NA valuses with -9999
+Qfull <- Q
+Qfull$Flow[is.na(Qfull$Flow)==TRUE] <- -9999
+summary(Qfull)
+# findGaps(Qfull, minlength=1, quiet=FALSE)
+
+# Change the format and name of datetime back to "Date
+Qfull <- Qfull %>%
+  mutate(Date=as.Date(datetime))%>%
+  select(-datetime)
+Qfull <- Qfull[, c("Date", "Flow")]
+
+# Plot the data (Note: Q still has missing values as "NA" rather than -9999, so better for plotting)
+QPlot <- Q
+QPlot$datetime <- as.Date(QPlot$datetime)
+
+ggplot(data=QPlot, mapping=aes(x=datetime))+
+  geom_line(aes(y=Flow)) +
+  scale_x_date(date_labels=("%Y"), date_breaks=("years"))
 ```
 
 ## Separate the streamflow into calibration and validation periods and save them as .csv files
@@ -653,91 +653,90 @@ Calibration period: 2007-258 through 2010-257, and 2013-258 to 2015-257 (inclusi
 Validation period: remainder of the modelled period, i.e. 2010-258 to 2013-257, and 2015-258 to 2016-258 
 
 ```{r eval=FALSE}
-# # Qfull is the complete, original streamflow dataset, filtered to start at 2005-01-01 and to replace missing values with -9999
-# 
-# Qfull <- Qfull %>%
-#   filter(Date>="2005-01-01") %>%
-#   select(-ID, -PARAM)
-# Qfull$Value[is.na(Qfull$Value)==TRUE] <- -9999
-# 
-# # Create Qcal which contains only the measured flow during the calibration period
-# Qcal1 <- Qfull
-# Qcal1 <- filter(Qcal1, Date>="2007-09-15" & Date<="2010-09-14")
-# summary(Qcal1)
-# 
-# Qcal2 <- Qfull
-# Qcal2 <- filter(Qcal2, Date >= "2013-09-15" & Date <= "2015-09-14")
-# 
-# Qcal <- rbind(Qcal1, Qcal2)
-# Qcal <- rename(Qcal, CalFlow=Flow)
-# 
-#  
-# # Create Qval which contains only the measured flow during the validation period
-# Qval1 <- Qfull
-# Qval1 <- filter(Qval1, Date>="2010-09-15" & Date<="2013-09-14")
-# 
-# Qval2 <- Qfull
-# Qval2 <- filter(Qval2, Date >= "2015-09-15" & Date <= "2016-09-14")
-# 
-# Qval <- rbind(Qval1, Qval2)
-# Qval <- rename(Qval, ValFlow=Flow)
-# 
-# # Create the "negative" flow, which changes the sign of flows > 0, and represents missing and zero flows with -9999
-# Qneg <- mutate(Qfull, Negative=ifelse(Flow==0|Flow==-9999,-9999,-1*Flow))
-# 
-# Qneg_check <- filter(Qneg, Negative==-9999)
-# 
-# Qneg <- select(Qneg, Date, Negative)
-# 
-# # Put the negative, calibration, and validation flows together into one dataframe
-# Qboth <- merge(Qneg, Qcal,by="Date", all=TRUE )
-# Qboth <- merge(Qboth, Qval, by="Date", all=TRUE)
-# 
-# Qboth$CalAll <- NA
-# Qboth$ValAll <- NA
-# 
-# # This section populates the CalAll and ValAll columns with the flow values (actual or -ve values) for the whole timeperiod. 
-# 
-# #First, puts the calibration period flows into the CalAll column. Then, pastes negative streamflow into the missing (NA) points. Then does the same for the ValAll column.
-# Qboth$CalAll <- Qboth$CalFlow
-# Qboth$CalAll[is.na(Qboth$CalAll)] <- paste0(Qboth$Negative[is.na(Qboth$CalAll)])
-# Qboth$CalAll <- as.double(Qboth$CalAll)
-# Qboth$ValAll <- Qboth$ValFlow
-# Qboth$ValAll[is.na(Qboth$ValAll)] <- paste0(Qboth$Negative[is.na(Qboth$ValAll)])
-# Qboth$ValAll <- as.double(Qboth$ValAll)
-# 
-# # Note one last thing: the model needs a positive value on the start date of the model. Therefore, change the streamflow value on 2006-09-15 to a positive value
-# 
-# ModelStart <- which(Qboth$Date==as.Date("2006-09-15")) #Returns the line where date=2006=09-15
-# 
-# Qboth$CalAll[ModelStart] <- -1*Qboth$CalAll[ModelStart]
-# Qboth$ValAll[ModelStart] <- -1*Qboth$ValAll[ModelStart]
-# 
-# Qboth[ModelStart,]
-# 
-# #Plot the flow values to check to make sure the cal/val periods are right, and negative flows are represented. 
-#     # Note: first need to change all -9999 values to NA so it doesn't throw off the plot
-# 
-# QPlot <- Qboth
-# QPlot <- mutate(QPlot, CalAll=ifelse(CalAll==-9999,NA,CalAll), ValAll=ifelse(ValAll==-9999,NA,ValAll))
-# 
-# ggplot(data=QPlot, mapping=aes(x=Date))+
-#   geom_line(aes(y=CalAll), color="blue", size=1) +
-#   scale_x_date(date_labels=("%Y"), date_breaks=("years")) +
-#   geom_line(aes(y=ValAll), color="red", size=0.5)+
-#   labs(x="Date", y="Discharge")
-# 
-# 
-# #Check that the morphed dataset is the same as the original Q dataset
-# Qcheck <- Qfull
-# Qcheck$Check <- NA
-# Qcheck$Check <- abs(QPlot$CalAll)-Qcheck$Flow
-# CalCheck <- force(unique(Qcheck$Check))
-# CalCheck
-# 
-# Qcheck$Check <- abs(QPlot$ValAll)-Qcheck$Flow
-# ValCheck <- force(unique(Qcheck$Check))
-# ValCheck
+# Qfull is the complete, original streamflow dataset, filtered to start at 2005-01-01 and to replace missing values with -9999
+
+# Create Qcal which contains only the measured flow during the calibration period
+Qcal1 <- Qfull
+Qcal1 <- filter(Qcal1, datetime>="2007-09-15" & datetime<="2010-09-14")
+summary(Qcal1)
+
+Qcal2 <- Qfull
+Qcal2 <- filter(Qcal2, datetime >= "2013-09-15" & datetime <= "2015-09-14")
+
+Qcal <- rbind(Qcal1, Qcal2)
+Qcal <- rename(Qcal, CalFlow=Flow)
+
+
+# Create Qval which contains only the measured flow during the validation period
+Qval1 <- Qfull
+Qval1 <- filter(Qval1, datetime>="2010-09-15" & datetime<="2013-09-14")
+
+Qval2 <- Qfull
+Qval2 <- filter(Qval2, datetime >= "2015-09-15" & datetime <= "2016-09-14")
+
+Qval <- rbind(Qval1, Qval2)
+Qval <- rename(Qval, ValFlow=Flow)
+
+# Create the "negative" flow, which changes the sign of flows > 0, and represents missing and zero flows with -9999
+Qneg <- mutate(Qfull, Negative=ifelse(Flow==0|Flow==-9999,-9999,-1*Flow))
+
+Qneg_check <- filter(Qneg, Negative==-9999)
+
+Qneg <- select(Qneg, datetime, Negative)
+
+# Put the negative, calibration, and validation flows together into one dataframe
+Qboth <- merge(Qneg, Qcal,by="datetime", all=TRUE )
+Qboth <- merge(Qboth, Qval, by="datetime", all=TRUE)
+
+# This section populates the CalAll and ValAll columns with the flow values (actual or -ve values) for the whole timeperiod.
+Qboth$CalAll <- NA
+Qboth$ValAll <- NA
+
+#First, puts the calibration period flows into the CalAll column. Then, pastes negative streamflow into the missing (NA) points. Then does the same for the ValAll column.
+Qboth$CalAll <- Qboth$CalFlow
+Qboth$CalAll[is.na(Qboth$CalAll)] <- paste0(Qboth$Negative[is.na(Qboth$CalAll)])
+Qboth$CalAll <- as.double(Qboth$CalAll)
+Qboth$ValAll <- Qboth$ValFlow
+Qboth$ValAll[is.na(Qboth$ValAll)] <- paste0(Qboth$Negative[is.na(Qboth$ValAll)])
+Qboth$ValAll <- as.double(Qboth$ValAll)
+
+# Note one last thing: the model needs a positive value on the start date of the model. Therefore, change the streamflow value on 2006-09-15 to a positive value
+
+ModelStart <- which(Qboth$Date==as.Date("2006-09-15")) #Returns the line where date=2006=09-15
+
+Qboth$CalAll[ModelStart] <- -1*Qboth$CalAll[ModelStart]
+Qboth$ValAll[ModelStart] <- -1*Qboth$ValAll[ModelStart]
+
+# Check for missing values one final time
+QCheckGaps <- Qboth %>%
+  select(datetime, CalAll, ValAll)
+findGaps(QCheckGaps)
+
+
+#Plot the flow values to check to make sure the cal/val periods are right, and negative flows are represented.
+    # Note: first need to change all -9999 values to NA so it doesn't throw off the plot
+
+QPlot <- Qboth
+QPlot <- mutate(QPlot, CalAll=ifelse(CalAll==-9999,NA,CalAll), ValAll=ifelse(ValAll==-9999,NA,ValAll))
+QPlot$datetime <- as.Date(QPlot$datetime)
+
+ggplot(data=QPlot, mapping=aes(x=datetime))+
+  geom_line(aes(y=CalAll), color="blue", size=1) +
+  scale_x_date(date_labels=("%Y"), date_breaks=("years")) +
+  geom_line(aes(y=ValAll), color="red", size=0.5)+
+  labs(x="Date", y="Discharge")
+
+
+#Check that the morphed dataset is the same as the original Q dataset
+Qcheck <- Qfull
+Qcheck$Check <- NA
+Qcheck$Check <- abs(QPlot$CalAll)-Qcheck$Flow
+CalCheck <- force(unique(Qcheck$Check))
+CalCheck
+
+Qcheck$Check <- abs(QPlot$ValAll)-Qcheck$Flow
+ValCheck <- force(unique(Qcheck$Check))
+ValCheck
 
 ```
 
@@ -746,20 +745,20 @@ Validation period: remainder of the modelled period, i.e. 2010-258 to 2013-257, 
 ## Write the streamflow values to file - both an excel .csv file including the date, and a .csv file with only the flow values
 ```{r}
 
-# QFinal <- select(Qfull, Date, Flow)
-# QWrite <- select(Qfull, Flow)
-# write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_full.xlsx.csv")
-# write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_full.csv", col_names=FALSE)
-# 
-# QFinal <- select(Qboth, Date, CalAll)
-# QWrite <- select(Qboth, CalAll)
-# write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_cal.xlsx.csv")
-# write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_cal.csv", col_names=FALSE)
-# 
-# QFinal <- select(Qboth, Date, ValAll)
-# QWrite <- select(Qboth, ValAll)
-# write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_val.xlsx.csv")
-# write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_val.csv", col_names=FALSE)
+QFinal <- select(Qfull, datetime, Flow)
+QWrite <- select(Qfull, Flow)
+write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_full.xlsx.csv")
+write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_full.csv", col_names=FALSE)
+
+QFinal <- select(Qboth, datetime, CalAll)
+QWrite <- select(Qboth, CalAll)
+write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_cal.xlsx.csv")
+write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_cal.csv", col_names=FALSE)
+
+QFinal <- select(Qboth, datetime, ValAll)
+QWrite <- select(Qboth, ValAll)
+write_excel_csv(QFinal, "../Data/Processed/Validation/Streamflow_val.xlsx.csv")
+write_tsv(QWrite, "../Data/Processed/Validation/Streamflow_val.csv", col_names=FALSE)
 ```
 
 ## Load and plot precipitation used in the model to compare with streamflow

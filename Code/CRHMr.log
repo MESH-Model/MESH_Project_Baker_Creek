@@ -438,3 +438,17 @@
 2019-11-07_15:43:39 insertMissing Obs:obs 
 2019-11-07_15:43:39 findDupes obs:u_dups No dDupes found 
 2019-11-07_15:43:39 deDupe obs:u_dups 
+2019-11-15_11:48:40 insertMissing Obs:obs 
+2019-11-15_11:48:40 findGaps obs:Q variables:Flow 
+2019-11-15_12:04:56 insertMissing Obs:obs 
+2019-11-15_12:04:56 findGaps obs:Q variables:Flow 
+2019-11-15_12:05:02 insertMissing Obs:obs 
+2019-11-15_12:05:02 findGaps obs:Q variables:Flow 
+2019-11-15_12:06:12 insertMissing Obs:obs 
+2019-11-15_12:06:12 findGaps obs:Q variables:Flow 
+2019-11-15_12:08:16 insertMissing Obs:obs 
+2019-11-15_12:08:16 findGaps obs:Q variables:Flow 
+2019-11-15_12:09:08 insertMissing Obs:obs 
+2019-11-15_12:22:25 insertMissing Obs:obs 
+2019-11-15_12:22:25 findGaps obs:Qboth variables:Negative,CalFlow,ValFlow,CalAll,ValAll 
+2019-11-15_12:26:14 insertMissing Obs:obs 
