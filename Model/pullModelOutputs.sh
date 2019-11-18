@@ -7,7 +7,7 @@ nums='1 2 3 1-P 2-P'
 
 for scenario_num in $nums
 do
-  scenario="Scenario_${scenario_num}"
+  scenario="Scenario${scenario_num}"
 
 #Switch between dry run and regular by commenting/uncommenting the lines below
 
