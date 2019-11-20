@@ -217,16 +217,14 @@ Load the data files and combine into 1
 *Note: GEMLanding and GEMVital are the same values (same GEM grid); Therefore, dropped the GEMLanding data*
 ```{r}
 GEMFiles <- list.files(path=GEMCaPAFolder, pattern=glob2rx("rdps*.csv"))
-GEMFiles
 
 file_names <- c("Lin", "AirP_Pa", "Kin", "q_2m", "q_40m", "T_2m_degC","T_2m_degK","T_40m_degC", "T_40m_degK", "u_10m", "u_40m")
     #Units: W/m2, Pa, kg/kg, degrees C, degrees K, m/s; no need to do conversions
 
-setwd(GEMCaPAFolder)
 i=1
 colNames_GEM=c("DateTime", "GEMYellowknifeA", "GEMLanding", "GEMVital")
 for(x in GEMFiles) {
-  assign(file_names[i],as.data.frame(read_csv(x,skip=3,col_names=colNames_GEM)))  #Read the file and assign name
+  assign(file_names[i],as.data.frame(read_csv(paste0(GEMCaPAFolder,"/",x),skip=3,col_names=colNames_GEM)))  #Read the file and assign name
   i=i+1
 }
 ```
@@ -590,20 +588,26 @@ This station includes both discharge (param=1) and water level (param=2) data fo
 
 ## Loading in the data
 
-```{r eval=FALSE}
+```{r}
 # Download the HYDAT database (if not already done so; takes about 10 mins)
 
-hy_dir() # Returns the location of the Hydat database directory
-download_hydat() # Downloads the hydat database; have to type a response (yes or no) and won't download again if you have the most recent version
+# hy_dir() # Returns the location of the Hydat database directory
+# download_hydat() # Downloads the hydat database; have to type a response (yes or no) and won't download again if you have the most recent version
+# 
+# Qload <- hy_daily_flows("07SB013", start_date="2005-01-01", end_date="2019-12-31")
+# Qload <- as.data.frame(Qload)
+# head(Qload)
+# summary(Qload)
+# 
+# save(Qload, file="Qload.Rda", version=2)
 
-Qload <- hy_daily_flows("07SB013", start_date="2005-01-01", end_date="2019-12-31")
-Qload <- as.data.frame(Qload)
-head(Qload)
-summary(Qload)
+
+load("./Qload.Rda")
+
 ```
 
 ## Using CRHMr to explore the missing values in the data
-```{r eval=FALSE}
+```{r}
 Q <- Qload
 Q <- Q %>%
   select(-Parameter, -STATION_NUMBER, -Symbol)%>%
@@ -629,10 +633,10 @@ summary(Qfull)
 # findGaps(Qfull, minlength=1, quiet=FALSE)
 
 # Change the format and name of datetime back to "Date
-Qfull <- Qfull %>%
-  mutate(Date=as.Date(datetime))%>%
-  select(-datetime)
-Qfull <- Qfull[, c("Date", "Flow")]
+# Qfull <- Qfull %>%
+#   mutate(Date=as.Date(datetime))%>%
+#   select(-datetime)
+# Qfull <- Qfull[, c("Date", "Flow")]
 
 # Plot the data (Note: Q still has missing values as "NA" rather than -9999, so better for plotting)
 QPlot <- Q
@@ -652,7 +656,7 @@ Calibration period: 2007-258 through 2010-257, and 2013-258 to 2015-257 (inclusi
 
 Validation period: remainder of the modelled period, i.e. 2010-258 to 2013-257, and 2015-258 to 2016-258 
 
-```{r eval=FALSE}
+```{r}
 # Qfull is the complete, original streamflow dataset, filtered to start at 2005-01-01 and to replace missing values with -9999
 
 # Create Qcal which contains only the measured flow during the calibration period

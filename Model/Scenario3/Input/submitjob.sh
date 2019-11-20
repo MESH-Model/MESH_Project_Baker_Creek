@@ -12,7 +12,7 @@ echo "Starting run at: `date`"
 
 # Loop of trials (e.g. random seeds)
 #for trial in 001
-for trial in {001..005}
+for trial in {001..010}
 do
 
 # Run OstrichGCC

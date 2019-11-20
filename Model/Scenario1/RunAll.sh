@@ -44,15 +44,15 @@ chmod +x run_mesh.sh submitjob.sh
 cd $DIR
 
 # a)
-cd ../MESH_Code/r1552.mod
+cd ../MESH_Code/MESH_Code.r1024
 if [[ ! -x sa_mesh ]] ; then # If sa_mesh is not found or not executable
-  make
+  make -f makefile.gfortran
 fi
 
 # b)
 cd $DIR
 cd ../Ostrich
-if [[ ! -x OstrichGCC ]] ; then
+if [[ ! -x OstrichGCC ]] ; then # If OstrichGCC is not found or not executable
   make GCC
 fi
 
