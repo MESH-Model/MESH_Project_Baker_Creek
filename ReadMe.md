@@ -19,6 +19,16 @@ November, 2019
 ## References
   See the [Basin Meta-data Page](https://wiki.usask.ca/display/MESH/Basin+Meta-data) and the project report for a list of references. *Not yet complete*
 ___
+
+# Workflow Procedure
+In order to reproduce the project workflow, the following steps can be followed:
+
+![Model Workflow](Workflow.PNG)
+
+Notes:
+-	The method of dividing trials was used to reduce total computational time for running Ostrich in serial; If Ostrich can be set up to run in parallel, this would negate the need for the trial division and the workflow would change.
+-	When testing the “Calibration” scenarios, keep the number of iterations low (i.e. <5 or 10, see ostIn.txt) and the number of trials and folders low (ie. <5, in DivideTrials.sh)
+
 ___
 # Folder Structure
 So far, this folder is not tracked in GitHub.

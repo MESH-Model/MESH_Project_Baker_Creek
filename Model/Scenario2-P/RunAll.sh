@@ -19,23 +19,14 @@ make
 # 4. Create symbolic links to the driving data
 cd $DIR/Input
 pwd
-    # a) Use this chunk if using Mac or Linux
-# ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_humidity.csv ./basin_humidity.csv
-# ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_longwave.csv ./basin_longwave.csv
-# ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_pres.csv ./basin_pres.csv
-# ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_rain.csv ./basin_rain.csv
-# ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_shortwave.csv ./basin_shortwave.csv
-# ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_temperature.csv ./basin_temperature.csv
-# ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_wind.csv ./basin_wind.csv
 
-    # b) Or use this chunk for Linux sub-system on windows (note: file links have same size as original)
-ln -Pf ../../../Data/Processed/Driving/Scenario2and3/basin_humidity.csv ./basin_humidity.csv
-ln -Pf ../../../Data/Processed/Driving/Scenario2and3/basin_longwave.csv ./basin_longwave.csv
-ln -Pf ../../../Data/Processed/Driving/Scenario2and3/basin_pres.csv ./basin_pres.csv
-ln -Pf ../../../Data/Processed/Driving/Scenario2and3/basin_rain.csv ./basin_rain.csv
-ln -Pf ../../../Data/Processed/Driving/Scenario2and3/basin_shortwave.csv ./basin_shortwave.csv
-ln -Pf ../../../Data/Processed/Driving/Scenario2and3/basin_temperature.csv ./basin_temperature.csv
-ln -Pf ../../../Data/Processed/Driving/Scenario2and3/basin_wind.csv ./basin_wind.csv
+ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_humidity.csv basin_humidity.csv
+ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_longwave.csv basin_longwave.csv
+ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_pres.csv basin_pres.csv
+ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_rain.csv basin_rain.csv
+ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_shortwave.csv basin_shortwave.csv
+ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_temperature.csv basin_temperature.csv
+ln -sf ../../../Data/Processed/Driving/Scenario2and3/basin_wind.csv basin_wind.csv
 
 # and change the executable file permissions
 chmod +x run_mesh.sh submitjob.sh

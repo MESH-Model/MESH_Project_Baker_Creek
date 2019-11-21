@@ -38,7 +38,7 @@ This section gathers the results from each of the 100 trials, creates a table of
 
 ####  Scenario 1 Load Calibration Results
 
-folder_S1 <- list.dirs("C:/Users/hlb749/OneDrive - University of Saskatchewan/BakerCreekRun2/Model/Scenario1/Output")
+folder_S1 <- list.dirs("../Model/Scenario1/Output")
 folder_S1 <- folder_S1[-1]
 MetricsFile <- "Metrics_Out.txt"
 CalResultsFile <- "OstModel0.txt"
@@ -82,7 +82,7 @@ NSFullRanked_S1 <- Full_Trials_S1[order( as.numeric(as.character(Full_Trials_S1$
 #____________________________________________________________________________________________
 ####  Scenario 2 Load Calibration Results
 ####  
-folder_S2 <- list.dirs("C:/Users/hlb749/OneDrive - University of Saskatchewan/BakerCreekRun2/Model/Scenario2/Output")
+folder_S2 <- list.dirs("../Model/Scenario2/Output")
 folder_S2 <- folder_S2[-1]
 MetricsFile <- "Metrics_Out.txt"
 
@@ -120,11 +120,11 @@ NSFullRanked_S2 <- Full_Trials_S2[order( as.numeric(as.character(Full_Trials_S2$
 ```
 
 
-```{r eval=FALSE}
+```{r}
 #____________________________________________________________________________________________
 ####  Scenario 3 Load Calibration Results
 ####  
-folder_S3 <- list.dirs("C:/Users/hlb749/OneDrive - University of Saskatchewan/BakerCreekRun2/Model/Scenario3/Output")
+folder_S3 <- list.dirs("../Model/Scenario3/Output")
 folder_S3 <- folder_S3[-1]
 MetricsFile <- "Metrics_Out.txt"
 
@@ -165,7 +165,7 @@ NSFullRanked_S3 <- Full_Trials_S3[order( as.numeric(as.character(Full_Trials_S3$
 #____________________________________________________________________________________________
 ####  Scenario 1P Load Calibration Results
 ####  
-folder_S1P <- list.dirs("C:/Users/hlb749/OneDrive - University of Saskatchewan/BakerCreekRun2/Model/Scenario1-P/Output")
+folder_S1P <- list.dirs("../Model/Scenario1-P/Output")
 folder_S1P <- folder_S1P[-1]
 MetricsFile <- "Metrics_Out.txt"
 
@@ -190,7 +190,7 @@ NSRanked_S1P <- NSResults_S1P[order( as.numeric(as.character(NSResults_S1P$NS)),
 #____________________________________________________________________________________________
 ####  Scenario 2P Load Calibration Results
 ####  
-folder_S2P <- list.dirs("C:/Users/hlb749/OneDrive - University of Saskatchewan/BakerCreekRun2/Model/Scenario2-P/Output")
+folder_S2P <- list.dirs("../Model/Scenario2-P/Output")
 folder_S2P <- folder_S2P[-1]
 MetricsFile <- "Metrics_Out.txt"
 
@@ -284,7 +284,7 @@ assign(paste("OstBestNorm_S",ScenarioNumber, sep=""), OstBestNormalized, envir=.
 ### Calculate Validation NSE
 ```{r}
 # Load the measured streamflow and filter down to 2006-09-15 through 2016-09-13
-Q_val_load <- read.csv("C:/Users/hlb749/OneDrive - University of Saskatchewan/BakerCreekRun2/Data/Processed/Validation/Streamflow_val.xlsx.csv")
+Q_val_load <- read.csv("../Data/Processed/Validation/Streamflow_val.xlsx.csv")
 
 Q_val <- Q_val_load
 Q_val[,1] <- as.Date.factor(Q_val[,1])
@@ -376,7 +376,7 @@ for (i in 3:12){
 }
 ```
 
-```{r eval=FALSE}
+```{r}
 # Scenario 3 ________________________________________________________________________
 # Load the simulated streamflow from the top 10 calibration runs
 for (i in 1:10){
@@ -499,11 +499,11 @@ for (i in 3:12){
 
 ## Table summary of Trial, NSE for Cal, and NSE for Val
 ```{r eval=FALSE}
-Perf_Summary <- data.frame(Scenario=c("Scenario 1", "Scenario1_2", "Scenario1_3", "Scenario 2", "Scenario 3", "Scenario 1-P", "Scenario 2-P"), Trial=c(NSRanked_S1$Trial[1],NSRanked_S1_2$Trial[1],NSRanked_S1_3$Trial[1], NSRanked_S2$Trial[1],NSRanked_S3$Trial[1], NSRanked_S1P$Trial[1], NSRanked_S2P$Trial[1]),  Cal_NSE=c(NSRanked_S1$NS[1],NSRanked_S1_2$NS[1],NSRanked_S1_3$NS[1], NSRanked_S2$NS[1],NSRanked_S3$NS[1], NSRanked_S1P$NS[1], NSRanked_S2P$NS[1]),Val_NSE=c(ValNSES1$NSE[1],ValNSES1_2$NSE[1],ValNSES1_3$NSE[1], ValNSES2$NSE[1],ValNSES3$NSE[1], ValNSES1P$NSE[1], ValNSES2P$NSE[1]))
+Perf_Summary <- data.frame(Scenario=c("Scenario 1", "Scenario 2", "Scenario 3", "Scenario 1-P", "Scenario 2-P"), Trial=c(NSRanked_S1$Trial[1], NSRanked_S2$Trial[1],NSRanked_S3$Trial[1], NSRanked_S1P$Trial[1], NSRanked_S2P$Trial[1]),  Cal_NSE=c(NSRanked_S1$NS[1], NSRanked_S2$NS[1],NSRanked_S3$NS[1], NSRanked_S1P$NS[1], NSRanked_S2P$NS[1]),Val_NSE=c(ValNSES1$NSE[1], ValNSES2$NSE[1],ValNSES3$NSE[1], ValNSES1P$NSE[1], ValNSES2P$NSE[1]))
 ```
 
 ## Table summary of Trials except S3, NSE for Cal, and NSE for Val
-```{r}
+```{r eval=FALSE}
 Perf_Summary <- data.frame(Scenario=c("Scenario 1", "Scenario 2", "Scenario 1-P", "Scenario 2-P"), Trial=c(NSRanked_S1$Trial[1], NSRanked_S2$Trial[1],NSRanked_S1P$Trial[1], NSRanked_S2P$Trial[1]),  Cal_NSE=c(NSRanked_S1$NS[1], NSRanked_S2$NS[1],NSRanked_S1P$NS[1], NSRanked_S2P$NS[1]),Val_NSE=c(ValNSES1$NSE[1], ValNSES2$NSE[1], ValNSES1P$NSE[1], ValNSES2P$NSE[1]))
 ```
 
@@ -523,7 +523,7 @@ BoxPlot100 <- ggplot()+
   xlab("") +
   geom_boxplot(data=NSResults_S2, mapping=aes(x="Scenario 2", y=NS))+
   geom_boxplot(data=NSResults_S2P, mapping=aes(x="Scenario 2-P", y=NS))+
-  #geom_boxplot(data=NSResults_S3, mapping=aes(x="Scenario 3", y=NS))+
+  geom_boxplot(data=NSResults_S3, mapping=aes(x="Scenario 3", y=NS))+
   labs(title="Model Performance in 100 Calibration Trials", subtitle="MESH Model, Baker Creek Watershed")
 
 BoxPlot100 <- BoxPlot100 + theme(plot.background = element_rect(colour="black", linetype=1, size=1))
@@ -689,7 +689,7 @@ ggsave(paste0(FigFolder,"S2Hydrograph.jpg"), plot=S2Hgraph, width=17.75, height=
 
 ```
 
-```{r eval=FALSE}
+```{r}
 #____________________________________________________________________________________________
 ####  Scenario 3 Streamflow Plot
 ####  
@@ -871,11 +871,11 @@ WB_S2 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 
   # xlim(as.Date("2007-09-15"), as.Date("2009-09-15"))+
   # ylim(-500,1500)
 
-# BestFolder_S3 <- NSRanked_S3$SubFolder[1]
-# setwd(BestFolder_S3)
-# WBOut_S3 <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
-# WB_S3 <- MESHr::basinWaterBalancePlot(WBOut_S3)
-# WB_S3 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 3", subtitle="MESH Model, Baker Creek Watershed")
+BestFolder_S3 <- NSRanked_S3$SubFolder[1]
+setwd(BestFolder_S3)
+WBOut_S3 <- read_MESH_OutputTimeseries_csv(WBFile, missingValueThreshold = -1e6)
+WB_S3 <- MESHr::basinWaterBalancePlot(WBOut_S3)
+WB_S3 + labs(title="Basin Water Balance for the Best Calibration Run - Scenario 3", subtitle="MESH Model, Baker Creek Watershed")
 
 BestFolder_S1P <- NSRanked_S1P$SubFolder[1]
 setwd(BestFolder_S1P)
@@ -893,7 +893,7 @@ WB_S2P + labs(title="Basin Water Balance for the Best Calibration Run - Scenario
 
 ```
 
-### Q.How did the top 10% of calibration runs compare to the validation runs?
+## Q.How did the top 10% of calibration runs compare to the validation runs?
 Create a box-whisker plot of the NSE values vs each calibration and validation period for the top 10% (10/100) calibration runs
 
 ```{r}
@@ -901,15 +901,15 @@ NSTop10 <- NSRanked_S1[c(1:10),2]
 NSTop10 <- cbind(NSTop10, ValNSES1[c(1:10),2])
 NSTop10 <- cbind(NSTop10, NSRanked_S2[c(1:10),2])
 NSTop10 <- cbind(NSTop10, ValNSES2[c(1:10),2])
-# NSTop10 <- cbind(NSTop10, NSRanked_S3[c(1:10),2])
-# NSTop10 <- cbind(NSTop10, ValNSES3[c(1:10),2])
+NSTop10 <- cbind(NSTop10, NSRanked_S3[c(1:10),2])
+NSTop10 <- cbind(NSTop10, ValNSES3[c(1:10),2])
 NSTop10 <- cbind(NSTop10, NSRanked_S1P[c(1:10),2])
 NSTop10 <- cbind(NSTop10, ValNSES1P[c(1:10),2])
 NSTop10 <- cbind(NSTop10, NSRanked_S2P[c(1:10),2])
 NSTop10 <- cbind(NSTop10, ValNSES2P[c(1:10),2])
 NSTop10 <- as.data.frame(NSTop10)
-# colnames(NSTop10) <- c("S1_Cal", "S1_Val","S2_Cal", "S2_Val","S3_Cal", "S3_Val", "S1P_Cal", "S1P_Val", "S2P_Cal", "S2P_Val")
-colnames(NSTop10) <- c("S1_Cal", "S1_Val","S2_Cal", "S2_Val", "S1P_Cal", "S1P_Val", "S2P_Cal", "S2P_Val")
+colnames(NSTop10) <- c("S1_Cal", "S1_Val","S2_Cal", "S2_Val","S3_Cal", "S3_Val", "S1P_Cal", "S1P_Val", "S2P_Cal", "S2P_Val")
+# colnames(NSTop10) <- c("S1_Cal", "S1_Val","S2_Cal", "S2_Val", "S1P_Cal", "S1P_Val", "S2P_Cal", "S2P_Val")
 
 
 Top10Box <- ggplot(stack(NSTop10), aes(x = ind, y = values)) +
@@ -926,23 +926,23 @@ ggsave(paste0(FigFolder,"Top10Box.jpg"), plot=Top10Box, width=17.75, height=9, u
 
 ```
 
-### Ranked model performance for 100 calibration runs
+## Ranked model performance for 100 calibration runs
 ```{r}
 AllRanked <- data.frame(Runs=c(100:1))
 AllRanked <- cbind(AllRanked, NSRanked_S1$NS)
 AllRanked <- cbind(AllRanked, NSRanked_S2$NS)
-#AllRanked <- cbind(AllRanked, NSRanked_S3$NS)
+AllRanked <- cbind(AllRanked, NSRanked_S3$NS)
 AllRanked <- cbind(AllRanked, NSRanked_S1P$NS)
 AllRanked <- cbind(AllRanked, NSRanked_S2P$NS)
-#colnames(AllRanked) <- c("Runs", "S1", "S2", "S3", "S1P", "S2P")
-colnames(AllRanked) <- c("Runs", "S1", "S2", "S1P", "S2P")
+colnames(AllRanked) <- c("Runs", "S1", "S2", "S3", "S1P", "S2P")
+# colnames(AllRanked) <- c("Runs", "S1", "S2", "S1P", "S2P")
 
-# AllRanked <- gather(AllRanked, S1, S2, S3, S1P, S2P, key="Scenario", value="NS")
-AllRanked <- gather(AllRanked, S1, S2, S1P, S2P, key="Scenario", value="NS")
+AllRanked <- gather(AllRanked, S1, S2, S3, S1P, S2P, key="Scenario", value="NS")
+# AllRanked <- gather(AllRanked, S1, S2, S1P, S2P, key="Scenario", value="NS")
 
 AllRanked$LnTyp <- ifelse(AllRanked$Scenario=="S1","a",ifelse(AllRanked$Scenario=="S2","b","d"))
-# AllRanked$Scenario <- factor(AllRanked$Scenario, levels=c("S1P", "S2P", "S3", "S2", "S1"))
-AllRanked$Scenario <- factor(AllRanked$Scenario, levels=c("S1P", "S2P", "S2", "S1"))
+AllRanked$Scenario <- factor(AllRanked$Scenario, levels=c("S1P", "S2P", "S3", "S2", "S1"))
+# AllRanked$Scenario <- factor(AllRanked$Scenario, levels=c("S1P", "S2P", "S2", "S1"))
 
 RankedPlot <- ggplot()+
   geom_line(data=AllRanked, mapping=aes(x=Runs, y=NS, color=Scenario, linetype=Scenario), size=1)+
@@ -1021,7 +1021,7 @@ Perf_Plot <- gather(Perf, "Calibration", "Validation", key="Performance", value=
 
 ### Plot the identifiability for each calibrated parameter for each scenario
 Plot normalized parameter range vs parameter (see notes as well as Herbert's report) for each configuration; be sure to add a straight line for the "acceptable identifiability" cutoff.
-```{r eval=FALSE}
+```{r}
 ParamIdent(folder_S1, 1, 8) #Resulting OstBest files are called "S1"
 ParamIdent(folder_S2, 2, 6)
 ParamIdent(folder_S3, 3, 6)
@@ -1029,7 +1029,7 @@ ParamIdent(folder_S1P, "1P", 8)
 ParamIdent(folder_S2P, "2P", 6)
 ```
 
-```{r eval=FALSE}
+```{r}
 OstBestNorm_S1$Param_Names <- gsub(" ", "", OstBestNorm_S1$Param_Names)
 OstBestNorm_S2$Param_Names <- gsub(" ", "", OstBestNorm_S2$Param_Names)
 OstBestNorm_S3$Param_Names <- gsub(" ", "", OstBestNorm_S3$Param_Names)
