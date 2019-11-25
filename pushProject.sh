@@ -4,7 +4,7 @@
 #Switch between dry run and regular by commenting/uncommenting the lines below
 
 #Dry Run
-#rsync -avirh --dry-run ./ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject
+# rsync -avirh --dry-run --exclude '.git' ./ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject
 
 #Regular
-rsync -avirh ./ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject
+rsync -avirh --exclude '.git' ./ hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject
