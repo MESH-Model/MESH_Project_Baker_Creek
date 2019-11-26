@@ -31,7 +31,7 @@ Notes:
 
 ___
 # Folder Structure
-Giving the file size limitations of GitHub, only smaller files are stored here and the rest are stored on Graham. The files can be synced with the local machine via the respective push/pull bash scripts included in the Data/Raw and Model folders.
+Given the file size limitations of GitHub, only smaller files are stored here and the rest are stored on Graham. The files can be synced with the local machine via the respective push/pull bash scripts included in the Data/Raw and Model folders.
 
 Fore reference, the general rule for file sizes on GitHub is:
 - Repositories should be < 1 GB
