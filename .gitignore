@@ -11,8 +11,8 @@ Data/Processed/*.csv
 Data/Processed/*.r2c
 
 # Ignore compiled MESH and Ostrich files
-Model/MESH_Code/*/sa_mesh
-Model/MESH_Code/*/mpi_sa_mesh
+Model/MESH_Code/**/sa_mesh
+Model/MESH_Code/**/mpi_sa_mesh
 Model/Ostrich/OstrichGCC
 
 #Ignore all model output files
