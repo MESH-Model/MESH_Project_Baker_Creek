@@ -1,13 +1,22 @@
-#Ignore files in the Data/Raw folder
+# Don't ignore the push.sh or pull.sh files, or any .md (which are ReadMe) files
+!*.sh
+!*.md
+!.gitkeep
+
+# Ignore files in the Data/Raw folder
 Data/Raw/*
+
+# Ignore processed driving data files (obtain from storage location with pull.sh)
+Data/Processed/*.csv
+Data/Processed/*.r2c
+
+# Ignore compiled MESH and Ostrich files
+Model/MESH_Code/sa_mesh
+Model/MESH_Code/mpi_sa_mesh
+Model/Ostrich/OstrichGCC
 
 #Ignore all model output files
 Model/Scenario*/Output/*
 
 #Ignore the GrahamConnect.sh files (these are just shortcuts for connecting to Graham)
 GrahamConnect.sh
-
-#but don't ignore the push.sh or pull.sh files, or any .md (which are ReadMe) files
-!*.sh
-!*.md
-!.gitkeep

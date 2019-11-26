@@ -31,7 +31,9 @@ Notes:
 
 ___
 # Folder Structure
-So far, this folder is not tracked in GitHub.
+The general rule for file sizes on GitHub is:
+- Repositories should be < 1 GB
+- Files must be < 100 MB
 
 The files in these folders are stored on Graham and can be synced with the local machine via the respective push/pull bash scripts included in the Data/Raw and Model folders.
 
