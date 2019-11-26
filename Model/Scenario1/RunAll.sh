@@ -58,6 +58,3 @@ cd $DIR/Input
 
   # c)
 sbatch submitjob.sh
-
-# 7. Run the post-processing script and generate ONE jpeg to start
-### INCOMPLETE
