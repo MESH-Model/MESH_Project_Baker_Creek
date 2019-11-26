@@ -8,7 +8,9 @@ Data/Raw/*
 
 # Ignore processed driving data files (obtain from storage location with pull.sh)
 Data/Processed/*.csv
+Data/Processed/**/*.csv
 Data/Processed/*.r2c
+Data/Processed/**/*.r2c
 
 # Ignore compiled MESH and Ostrich files
 Model/MESH_Code/**/sa_mesh
