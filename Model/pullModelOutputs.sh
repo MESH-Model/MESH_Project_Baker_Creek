@@ -12,9 +12,10 @@ do
 #Switch between dry run and regular by commenting/uncommenting the lines below
 
 #Dry Run
-rsync -avirh --dry-run hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/$scenario/Output/ $scenario/Output
+rsync -rultvzi --dry-run hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/MESH_
+/Model/$scenario/Output/ $scenario/Output
 
 #Regular
-#rsync -avirh hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Model/$scenario/Output/ $scenario/Output
+#rsync -rultvzi hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/MESH_Project_Baker_Creek/Model/$scenario/Output/ $scenario/Output
 
 done
