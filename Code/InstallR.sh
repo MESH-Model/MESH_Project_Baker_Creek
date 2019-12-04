@@ -6,6 +6,7 @@
 # sudo apt-get install r-base-dev
 # sudo apt install build-essential
 # sudo apt install libcurl4-openssl-dev libssl-dev libxml2-dev
+# sudo apt-get install pandoc
 
 Rscript InstallPackages.R
 
