@@ -2,6 +2,8 @@
 
 # This file executes pre-processing scripts and makefiles, runs MESH, and then runs post-processing scripts to generate outputs.
 
+set -e # Will cause the script to stop if it encounters an error
+
 # 1. Obtain the directory where this script is located
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
@@ -20,13 +22,17 @@ make
 cd $DIR/Input
 pwd
 
-ln -sf ../../../Data/Processed/Driving/Scenario1/basin_humidity.csv basin_humidity.csv
-ln -sf ../../../Data/Processed/Driving/Scenario1/basin_longwave.csv basin_longwave.csv
-ln -sf ../../../Data/Processed/Driving/Scenario1/basin_pres.csv basin_pres.csv
-ln -sf ../../../Data/Processed/Driving/Scenario1/basin_rain.csv basin_rain.csv
-ln -sf ../../../Data/Processed/Driving/Scenario1/basin_shortwave.csv basin_shortwave.csv
-ln -sf ../../../Data/Processed/Driving/Scenario1/basin_temperature.csv basin_temperature.csv
-ln -sf ../../../Data/Processed/Driving/Scenario1/basin_wind.csv basin_wind.csv
+if [[ $(ls -l *.csv | wc -l) -ne 0 ]] ; then
+  rm *.csv
+fi
+
+ln -s ../../../Data/Processed/Driving/Scenario1/basin_humidity.csv basin_humidity.csv
+ln -s ../../../Data/Processed/Driving/Scenario1/basin_longwave.csv basin_longwave.csv
+ln -s ../../../Data/Processed/Driving/Scenario1/basin_pres.csv basin_pres.csv
+ln -s ../../../Data/Processed/Driving/Scenario1/basin_rain.csv basin_rain.csv
+ln -s ../../../Data/Processed/Driving/Scenario1/basin_shortwave.csv basin_shortwave.csv
+ln -s ../../../Data/Processed/Driving/Scenario1/basin_temperature.csv basin_temperature.csv
+ln -s ../../../Data/Processed/Driving/Scenario1/basin_wind.csv basin_wind.csv
 
 # and change the executable file permissions
 chmod +x run_mesh.sh submitjob.sh
