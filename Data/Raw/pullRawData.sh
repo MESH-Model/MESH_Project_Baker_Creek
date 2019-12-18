@@ -1,1 +1,1 @@
-rsync -rultvzi --dry-run hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/BakerCreekProject/Data/Raw/ .
+rsync -rultvzi hbrauner@graham.computecanada.ca:~/projects/rpp-hwheater/hbrauner/MESH_Project_Baker_Creek/Data/Raw/ .
