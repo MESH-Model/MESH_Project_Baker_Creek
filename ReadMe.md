@@ -17,7 +17,7 @@ November, 2019
   The modelling project for the purpose of the MWS Capstone Project is complete, though more work could be done to the model of the Baker Creek watershed to get better performance results.
 
 ## References
-  See the [Basin Meta-data Page](https://wiki.usask.ca/display/MESH/Basin+Meta-data) and the project report for a list of references. *Not yet complete*
+  See the [Basin Meta-data Page](https://wiki.usask.ca/display/MESH/Baker+Creek) and the project report for a list of references.
 ___
 
 # Workflow Procedure
@@ -49,11 +49,11 @@ Fore reference, the general rule for file sizes on GitHub is:
 - Includes processed driving data, spatial data (for use in Green Kenue to generate the r2c file for Scenario 3), and streamflow data used for validation
 
 #### Driving
-- Processed driving data used in the model
+- Processed driving data is generated using scripts in the "Code" folder, which process the raw data
+- The following processed driving datasets were used in the model:
   - One set used for Scenario 1
   - One set used for Scenarios 2 and 3
     - Note: this is the same data as Scenario 1, but copied to 6 columns -> one per GRU
-- Scripts used to generate the Scenario 1 file are included in the "Code" folder
 
 #### Spatial
 - Green Kenue files used to generate the r2c file for Scenario 3
